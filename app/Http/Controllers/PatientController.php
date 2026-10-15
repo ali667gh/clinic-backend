@@ -22,14 +22,15 @@ class PatientController extends Controller
             });
         }
 
-        // مرتب‌سازی بر اساس جدیدترین‌ها
-        $patients = $query->latest()->paginate(15);
+        $perPage = $request->input('per_page', 15);
+        $patients = $query->latest()->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
             'data' => $patients
         ]);
     }
+
 
     public function store(Request $request)
     {

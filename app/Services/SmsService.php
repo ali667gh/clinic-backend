@@ -23,34 +23,31 @@ class SmsService
      */
     public function sendResultLink(string $mobile, string $patientName, string $token): bool
     {
-        // نرمال‌سازی شماره تماس به فرمت استاندارد ایران (مثلاً 09123456789)
+        // استانداردسازی شماره تماس به 09xxxxxxxxx
         $mobile = preg_replace('/[^0-9]/', '', $mobile);
         if (str_starts_with($mobile, '98')) {
             $mobile = '0' . substr($mobile, 2);
         }
 
-        // ساخت لینک پرتال بیمار
-        $baseUrl = config('app.frontend_url', config('app.url', url('/')));
-        $link = rtrim($baseUrl, '/') . "/portal/{$token}";
-
+        // متن کامل برای ارسال عادی (Bulk)
+        $link = "https://report-tehranep.site/portal/{$token}";
         $message = "بیمار گرامی {$patientName}، نتیجه آزمایش و مدارک شما آماده است.\nمشاهده در پرتال: {$link}";
 
-        // بررسی وجود کلید API
         if (empty($this->apiKey)) {
-            Log::warning("SmsService: API Key تعریف نشده است. پیامک در لاگ ثبت شد: [{$mobile}] {$message}");
+            Log::warning("SmsService: API Key تعریف نشده است. متن لاگ شد: [{$mobile}] {$message}");
             return true;
         }
 
         try {
-            // اگر قالب پترن (Verify) تنظیم شده باشد
+            // ارسال بر اساس پترن سریع (Verify)
             if (!empty($this->templateId)) {
                 return $this->sendViaTemplate($mobile, [
-                    'name' => $patientName,
-                    'link' => $link,
+                    'PATIENTNAME' => $patientName,
+                    'TOKEN'       => $token,
                 ]);
             }
 
-            // ارسال مستقیم متنی عادی
+            // ارسال پیام متنی معمولی (در صورت عدم تنظیم Template)
             return $this->sendViaBulk($mobile, $message);
         } catch (\Throwable $e) {
             Log::error("SmsService Exception: " . $e->getMessage(), [
@@ -62,7 +59,7 @@ class SmsService
     }
 
     /**
-     * ارسال بر اساس پترن/قالب sms.ir
+     * ارسال بر اساس قالب sms.ir
      */
     protected function sendViaTemplate(string $mobile, array $parameters): bool
     {
@@ -95,7 +92,7 @@ class SmsService
     }
 
     /**
-     * ارسال مستقیم متنی (Bulk)
+     * ارسال متنی عادی (Bulk)
      */
     protected function sendViaBulk(string $mobile, string $message): bool
     {
