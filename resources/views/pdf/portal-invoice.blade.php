@@ -199,7 +199,7 @@
                 </td>
                 <td style="width: 62%; text-align: right; direction: rtl;">
                     <strong>تهران – خيابان وليعصر – خيابان توانير – نرسيده به ميدان – نبش روانسر</strong><br>
-                    تلفن: {{ fa_num('021 88887270') }}
+                    تلفن: {{ fa_num('021-88887270') }}
                 </td>
             </tr>
         </table>
@@ -288,7 +288,7 @@
             </td>
             <td style="width: 54%; text-align: right;">
                 <div class="clinic-title">مرکز آریتمی تهران</div>
-                <div class="clinic-sub">تشخ يص و درمان اختلالات ضربان قلب</div>
+                <div class="clinic-sub" dir="rtl">تشخیص و درمان اختلالات ضربان قلب</div>
             </td>
             <td class="meta" style="width: 30%;">
                 <div><strong>شماره پرونده:</strong> #{{ fa_num($invoice['file_number'] ?? '---') }}</div>
