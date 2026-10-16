@@ -29,9 +29,9 @@ class SmsService
             $mobile = '0' . substr($mobile, 2);
         }
 
-        // متن کامل برای ارسال عادی (Bulk)
-        $link = "https://report-tehranep.site/portal/{$token}";
-        $message = "بیمار گرامی {$patientName}، نتیجه آزمایش و مدارک شما آماده است.\nمشاهده در پرتال: {$link}";
+        // متن کامل جدید برای ارسال عادی (Bulk)
+        $link = "report-tehranep.site/portal/{$token}";
+        $message = "مراجعه‌کننده گرامی،\nنتایج بررسی‌های شما در مرکز آریتمی تهران آماده است.\nبرای مشاهده و دریافت مدارک خود به لینک زیر مراجعه کنید:\n{$link}";
 
         if (empty($this->apiKey)) {
             Log::warning("SmsService: API Key تعریف نشده است. متن لاگ شد: [{$mobile}] {$message}");
@@ -42,8 +42,7 @@ class SmsService
             // ارسال بر اساس پترن سریع (Verify)
             if (!empty($this->templateId)) {
                 return $this->sendViaTemplate($mobile, [
-                    'PATIENTNAME' => $patientName,
-                    'TOKEN'       => $token,
+                    'TOKEN' => $token,
                 ]);
             }
 
