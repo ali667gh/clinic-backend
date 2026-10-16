@@ -72,7 +72,7 @@ class ImportPatients extends Command
 
 
             // درج دسته‌ای (Batch Insert) برای سرعت بالا
-            DB::table('patients')->insert($insertData);
+            DB::table('patients')->insertOrIgnore($insertData);
             $this->line("1000 رکورد دیگر با موفقیت ثبت شد...");
         });
 
