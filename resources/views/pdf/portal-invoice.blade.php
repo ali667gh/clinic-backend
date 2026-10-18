@@ -200,7 +200,7 @@
                 <td style="width: 65%; text-align: right; direction: rtl;">
                     <strong>تهران – خيابان وليعصر – خيابان توانير – نرسيده به ميدان – نبش روانسر</strong><br>
                     <div style="margin-top: 3px; text-align: right; direction: rtl;">
-                        <span>تلفن: </span><span style="direction: ltr; display: inline-block;">{{ fa_num('021-88887270') }}</span>
+                        <span>تلفن و واتس اپ: </span><span style="direction: ltr; display: inline-block;">{{ fa_num('021_88887270') }}</span>
                     </div>
                 </td>
             </tr>
