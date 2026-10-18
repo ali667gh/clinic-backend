@@ -13,13 +13,40 @@ class PatientController extends Controller
         $query = Patient::query();
 
         if ($request->filled('search')) {
-            $s = $request->input('search');
-            $query->where(function ($q) use ($s) {
-                $q->where('full_name', 'like', "%{$s}%")
-                    ->orWhere('national_code', 'like', "%{$s}%")
-                    ->orWhere('file_number', 'like', "%{$s}%")
-                    ->orWhere('mobile', 'like', "%{$s}%");
-            });
+            $rawSearch = trim($request->input('search'));
+
+            // ۱. تبدیل اعداد فارسی و عربی به انگلیسی
+            $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $arabic  = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $s = str_replace($persian, $english, $rawSearch);
+            $s = str_replace($arabic, $english, $s);
+
+            $type = $request->input('type'); // در صورت ارسال صریح از فرانت: file_number, national_code, mobile, full_name
+
+            if ($type && in_array($type, ['file_number', 'national_code', 'mobile', 'full_name'])) {
+                // اگر نوع مشخص ارسال شده بود
+                $query->where($type, 'like', "%{$s}%");
+            } else {
+                // تفکیک هوشمند خودکار
+                if (ctype_digit($s)) {
+                    $len = strlen($s);
+
+                    if (str_starts_with($s, '09') || $len === 11) {
+                        // فقط شماره موبایل
+                        $query->where('mobile', 'like', "%{$s}%");
+                    } elseif ($len === 10) {
+                        // فقط کد ملی
+                        $query->where('national_code', 'like', "%{$s}%");
+                    } else {
+                        // اعدادی مثل 59494 فقط شماره پرونده هستند
+                        $query->where('file_number', 'like', "%{$s}%");
+                    }
+                } else {
+                    // حروف یا نام
+                    $query->where('full_name', 'like', "%{$s}%");
+                }
+            }
         }
 
         $perPage = $request->input('per_page', 15);
@@ -30,6 +57,7 @@ class PatientController extends Controller
             'data' => $patients
         ]);
     }
+
 
 
     public function store(Request $request)
