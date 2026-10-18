@@ -169,14 +169,14 @@
 
         .footer-table {
             width: 100%;
-            border-top: 1.5px solid #cbd5e0;
+            border-top: 2.5px solid #0f766e;
             border-collapse: collapse;
-            padding-top: 6px;
         }
 
         .footer-table td {
+            padding-top: 4px;
             font-size: 9px;
-            color: #4a5568;
+            color: #2d3748;
             vertical-align: top;
         }
     </style>
@@ -189,19 +189,19 @@
     $hasPrescription = trim((string) ($doctorPrescriptionText ?? '')) !== '';
     @endphp
 
-    {{-- تعریف فوتر هماهنگ با سند --}}
+    {{-- تعریف فوتر با خط سبز و موقعیت دقیق راست‌چین آدرس و تلفن --}}
     <htmlpagefooter name="clinicFooter">
-        <table class="footer-table">
+        <table class="footer-table" dir="ltr">
             <tr>
-                {{-- سمت راست: آدرس و تلفن --}}
+                <td style="width: 35%; text-align: left; direction: ltr;">
+                    <strong style="color: #0f766e; font-size: 11px;">www.TehranEP.center</strong><br>
+                    Tel &amp; WhatsApp: +98(21) 88887270
+                </td>
                 <td style="width: 65%; text-align: right; direction: rtl;">
                     <strong>تهران – خيابان وليعصر – خيابان توانير – نرسيده به ميدان – نبش روانسر</strong><br>
-                    <span style="color: #2d3748;">تلفن: {{ fa_num('021-88887270') }}</span>
-                </td>
-                {{-- سمت چپ: وب‌سایت و ایمیل/واتساپ --}}
-                <td style="width: 35%; text-align: left; direction: ltr;">
-                    <strong style="color: #1a365d; font-size: 10px;">www.TehranEP.center</strong><br>
-                    <span style="color: #4a5568;">Tel &amp; WhatsApp: +98(21) 88887270</span>
+                    <div style="margin-top: 3px; text-align: right; direction: rtl;">
+                        <span>تلفن: </span><span style="direction: ltr; display: inline-block;">{{ fa_num('021-88887270') }}</span>
+                    </div>
                 </td>
             </tr>
         </table>
