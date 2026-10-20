@@ -63,6 +63,41 @@ class ArchiveController extends Controller
         ];
     }
 
+    /**
+     * شمارش خدمات «ویزیت پایه» در یک آرایه از خدمات.
+     * اولویت تشخیص: serviceDbId (شناسه واقعی دیتابیس) ← کد خدمت ← شناسه عددی ← فلگ is_visit ذخیره‌شده.
+     */
+    private function countVisitServices($services): int
+    {
+        $count = 0;
+
+        foreach ((array) $services as $s) {
+            if (!is_array($s)) {
+                continue;
+            }
+
+            $rec = !empty($s['serviceDbId']) ? Service::find((int) $s['serviceDbId']) : null;
+
+            if (!$rec) {
+                $sid = trim((string) ($s['serviceId'] ?? ''));
+                if ($sid !== '' && $sid !== 'other') {
+                    $rec = Service::where('code', $sid)->first()
+                        ?: (ctype_digit($sid) ? Service::find((int) $sid) : null);
+                }
+            }
+
+            if ($rec) {
+                if ($rec->is_visit) {
+                    $count++;
+                }
+            } elseif (!empty($s['is_visit'])) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
     public function draftIndex(Request $request)
     {
         $patientId = $request->query('patient_id', $request->input('patient_id'));
@@ -100,6 +135,25 @@ class ArchiveController extends Controller
             return response()->json(['message' => 'فرمت داده‌های خدمات نامعتبر است.'], 422);
         }
         $services = array_values($services);
+
+        // جلوگیری از ثبت بیش از یک ویزیت پایه برای هر بیمار در لیست موقت
+        $newVisits = $this->countVisitServices($services);
+        if ($newVisits > 0) {
+            $existingVisits = 0;
+            $existingDrafts = DB::table('lab_drafts')
+                ->where('patient_id', $data['patient_id'])
+                ->get();
+
+            foreach ($existingDrafts as $existingDraft) {
+                $existingVisits += $this->countVisitServices(json_decode($existingDraft->services, true) ?: []);
+            }
+
+            if ($newVisits > 1 || $existingVisits > 0) {
+                return response()->json([
+                    'message' => 'برای این بیمار قبلاً یک ویزیت پایه در لیست موقت ثبت شده است.',
+                ], 422);
+            }
+        }
 
         foreach ($services as $i => $s) {
             if (!isset($services[$i]['file'])) {
@@ -277,6 +331,14 @@ class ArchiveController extends Controller
                 'message' => 'برای این خدمت نیاز به فایل ضمیمه است: «' . implode('»، «', $missingRequired) . '»',
                 'errors'  => ['files' => ['برای این خدمت نیاز به فایل ضمیمه است.']],
                 'missing_services' => array_values($missingRequired),
+            ], 422);
+        }
+
+        // جلوگیری از ثبت بیش از یک ویزیت پایه در یک پرونده
+        if ($this->countVisitServices(is_array($formData) ? ($formData['services'] ?? []) : []) > 1) {
+            return response()->json([
+                'message' => 'امکان ثبت بیش از یک ویزیت پایه در یک پرونده وجود ندارد.',
+                'errors'  => ['services' => ['بیش از یک ویزیت پایه انتخاب شده است.']],
             ], 422);
         }
 
@@ -835,9 +897,12 @@ class ArchiveController extends Controller
 
         // ۲. ردیف خدمات (زیرخدمت‌ها به‌عنوان اقلام اصلی جدول)
         $serviceList = $data['services'] ?? [];
-        $serviceMeta = [];
+
+        // برای هر serviceId یک صف نگه می‌داریم تا اگر یک خدمت (مثلاً ویزیت) چند بار
+        // با پزشک‌های مختلف ثبت شده بود، ورودی‌ها روی هم بازنویسی نشوند.
+        $serviceMetaQueue = [];
         foreach ($serviceList as $s) {
-            $serviceMeta[(string) ($s['serviceId'] ?? '')] = $s;
+            $serviceMetaQueue[(string) ($s['serviceId'] ?? '')][] = $s;
         }
 
         $pick = function (array $arr, array $keys) {
@@ -862,9 +927,9 @@ class ArchiveController extends Controller
         $rows = [];
         foreach (($invoiceDetails['items'] ?? []) as $item) {
             $sid        = (string) ($item['serviceId'] ?? '');
-            $meta       = $serviceMeta[$sid] ?? [];
+            $meta       = !empty($serviceMetaQueue[$sid]) ? array_shift($serviceMetaQueue[$sid]) : [];
             $qty        = max(1, (int) ($item['count'] ?? 1));
-            $doctorName = $meta['doctorName'] ?? $item['doctorName'] ?? null;
+            $doctorName = $item['doctorName'] ?? $meta['doctorName'] ?? null;
 
             $parentRec  = $findService($sid);
             $parentName = $item['serviceTitle'] ?? $meta['serviceTitle'] ?? $parentRec?->name ?? 'خدمت درمانی';
