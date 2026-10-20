@@ -66,7 +66,7 @@ class PatientController extends Controller
             'full_name'     => 'required|string|max:255',
             'file_number'   => 'required|string|max:50|unique:patients,file_number',
             'national_code' => 'required|string|size:10|unique:patients,national_code',
-            'mobile'        => 'nullable|string|regex:/^09\d{9}$/',
+            'mobile'        => 'required|string|regex:/^09\d{9}$/', // الزامی شد و چون unique ندارد تکراری پذیرفته میشود
             'address'       => 'nullable|string|max:500',
         ], [
             'full_name.required'     => 'نام و نام خانوادگی الزامی است.',
@@ -75,6 +75,7 @@ class PatientController extends Controller
             'national_code.required' => 'کد ملی الزامی است.',
             'national_code.size'     => 'کد ملی باید دقیقاً ۱۰ رقم باشد.',
             'national_code.unique'   => 'این کد ملی قبلاً ثبت شده است.',
+            'mobile.required'        => 'شماره موبایل الزامی است.',
             'mobile.regex'           => 'شماره موبایل وارد شده معتبر نیست (مثال: 09121234567).',
         ]);
 
@@ -104,7 +105,7 @@ class PatientController extends Controller
             'full_name'     => 'required|string|max:255',
             'file_number'   => ['required', 'string', 'max:50', Rule::unique('patients')->ignore($patient->id)],
             'national_code' => ['required', 'string', 'size:10', Rule::unique('patients')->ignore($patient->id)],
-            'mobile'        => 'nullable|string|regex:/^09\d{9}$/',
+            'mobile'        => 'required|string|regex:/^09\d{9}$/', // الزامی شد
             'address'       => 'nullable|string|max:500',
         ], [
             'full_name.required'     => 'نام و نام خانوادگی الزامی است.',
@@ -113,6 +114,7 @@ class PatientController extends Controller
             'national_code.required' => 'کد ملی الزامی است.',
             'national_code.size'     => 'کد ملی باید ۱۰ رقم باشد.',
             'national_code.unique'   => 'این کد ملی متعلق به بیمار دیگری است.',
+            'mobile.required'        => 'شماره موبایل الزامی است.',
             'mobile.regex'           => 'شماره موبایل نامعتبر است.',
         ]);
 
