@@ -18,11 +18,11 @@
 
         body {
             font-family: 'dejavusans', 'vazir', 'tahoma', sans-serif;
-            font-size: 10.5px;
+            font-size: 11.5px;
             color: #1a202c;
             direction: rtl;
             text-align: right;
-            line-height: 1.5;
+            line-height: 1.6;
             margin: 0;
             padding: 0;
         }
@@ -30,20 +30,22 @@
         .page-banner {
             background-color: #e8edf3;
             color: #2d3748;
-            font-size: 9.5px;
+            font-size: 10.5px;
             font-weight: bold;
-            padding: 4px 8px;
-            margin-bottom: 8px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
         }
 
         .head-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 2px solid #cbd5e0;
+            border-bottom: 2.2px solid #cbd5e0;
+            padding-bottom: 6px;
         }
 
         .head-table td {
-            padding: 2px 4px 6px 4px;
+            padding: 4px 6px 8px 6px;
             vertical-align: middle;
         }
 
@@ -52,65 +54,69 @@
         }
 
         .clinic-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: #1a365d;
         }
 
         .clinic-sub {
-            font-size: 10px;
+            font-size: 11.5px;
             color: #4a5568;
+            margin-top: 2px;
         }
 
         .meta {
-            font-size: 9px;
+            font-size: 10.5px;
             color: #2d3748;
             text-align: left;
-            line-height: 1.6;
+            line-height: 1.65;
         }
 
         .patient-bar {
             width: 100%;
             border-collapse: collapse;
-            border: 1px solid #cbd5e0;
+            border: 1.5px solid #cbd5e0;
             background-color: #f7fafc;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            margin-top: 6px;
+            border-radius: 4px;
         }
 
         .patient-bar td {
-            padding: 5px 8px;
-            font-size: 10px;
+            padding: 7px 10px;
+            font-size: 11.5px;
         }
 
         .invoice-title {
             text-align: center;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: bold;
             color: #1a365d;
-            margin: 4px 0 8px 0;
-            padding: 2px 0;
+            margin: 6px 0 10px 0;
+            padding: 3px 0;
         }
 
         .cert-box {
-            border: 1px dashed #a0aec0;
+            border: 1.5px dashed #94a3b8;
             background-color: #f8fafc;
-            padding: 10px 12px;
-            margin-top: 4px;
+            padding: 14px 16px;
+            margin-top: 6px;
+            border-radius: 6px;
         }
 
         .cert-text {
-            font-size: 10.5px;
+            font-size: 12px;
             color: #2d3748;
-            line-height: 1.9;
+            line-height: 2.0;
             text-align: justify;
         }
 
         .doctors-title {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
             color: #2d3748;
-            border-bottom: 1px solid #cbd5e0;
-            padding-bottom: 4px;
+            border-bottom: 1.5px solid #cbd5e0;
+            padding-bottom: 5px;
             margin-top: 18px;
         }
 
@@ -123,36 +129,36 @@
         .doctors-table td {
             text-align: center;
             vertical-align: bottom;
-            padding: 4px;
+            padding: 6px;
         }
 
         .doc-name {
             font-weight: bold;
-            font-size: 10.5px;
+            font-size: 11.5px;
             color: #1a202c;
-            margin-top: 3px;
+            margin-top: 4px;
         }
 
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .items-table th {
             background-color: #edf2f7;
             color: #2d3748;
-            border: 1px solid #cbd5e0;
-            padding: 6px 4px;
-            font-size: 9.5px;
+            border: 1.5px solid #cbd5e0;
+            padding: 7px 5px;
+            font-size: 11px;
             font-weight: bold;
             text-align: center;
         }
 
         .items-table td {
-            border: 1px solid #cbd5e0;
-            padding: 5px 4px;
-            font-size: 9.5px;
+            border: 1.5px solid #cbd5e0;
+            padding: 6px 5px;
+            font-size: 11px;
             text-align: center;
         }
 
@@ -162,9 +168,9 @@
         }
 
         .sum-table td {
-            border: 1px solid #cbd5e0;
-            padding: 6px 8px;
-            font-size: 10px;
+            border: 1.5px solid #cbd5e0;
+            padding: 7px 10px;
+            font-size: 11.5px;
         }
 
         .footer-table {
@@ -174,8 +180,8 @@
         }
 
         .footer-table td {
-            padding-top: 4px;
-            font-size: 9px;
+            padding-top: 5px;
+            font-size: 10px;
             color: #2d3748;
             vertical-align: top;
         }
@@ -194,7 +200,7 @@
         <table class="footer-table" dir="ltr">
             <tr>
                 <td style="width: 35%; text-align: left; direction: ltr;">
-                    <strong style="color: #0f766e; font-size: 11px;">www.TehranEP.center</strong><br>
+                    <strong style="color: #0f766e; font-size: 11.5px;">www.TehranEP.center</strong><br>
                     Tel &amp; WhatsApp: +98(21) 88887270
                 </td>
                 <td style="width: 65%; text-align: right; direction: rtl;">
@@ -215,7 +221,7 @@
         <tr>
             <td style="width: 16%; text-align: left; padding-left: 8px;">
                 @if(!empty($logo))
-                <img src="{{ $logo }}" alt="لوگو" style="height: 52px; width: auto;">
+                <img src="{{ $logo }}" alt="لوگو" style="height: 55px; width: auto;">
                 @endif
             </td>
             <td style="width: 54%; text-align: right;">
@@ -262,15 +268,15 @@
             @forelse($visitDoctors as $doc)
             <td>
                 @if(!empty($doc['stamp']))
-                <img src="{{ $doc['stamp'] }}" alt="مهر پزشک" style="max-height: 105px; max-width: 200px;">
+                <img src="{{ $doc['stamp'] }}" alt="مهر پزشک" style="max-height: 105px; max-width: 190px;">
                 @else
-                <div style="height: 75px;"></div>
+                <div style="height: 70px;"></div>
                 @endif
                 <div class="doc-name">{{ $doc['name'] ?? '' }}</div>
             </td>
             @empty
             <td>
-                <div style="height: 75px;"></div>
+                <div style="height: 70px;"></div>
             </td>
             @endforelse
         </tr>
@@ -285,7 +291,7 @@
         <tr>
             <td style="width: 16%; text-align: left; padding-left: 8px;">
                 @if(!empty($logo))
-                <img src="{{ $logo }}" alt="لوگو" style="height: 52px; width: auto;">
+                <img src="{{ $logo }}" alt="لوگو" style="height: 55px; width: auto;">
                 @endif
             </td>
             <td style="width: 54%; text-align: right;">
@@ -344,8 +350,8 @@
 
     <table style="width: 100%; margin-top: 12px; border-collapse: collapse;">
         <tr>
-            <td style="width: 50%;"></td>
-            <td style="width: 50%; vertical-align: top;">
+            <td style="width: 48%;"></td>
+            <td style="width: 52%; vertical-align: top;">
                 <table class="sum-table">
                     <tr>
                         <td style="color: #4a5568;">مجموع خدمات:</td>
