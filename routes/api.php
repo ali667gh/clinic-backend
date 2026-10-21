@@ -12,6 +12,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\SecretaryController;
 use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\DispatchController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ReportController;
@@ -220,6 +221,39 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Dispatch Management (مدیریت ارسالی‌ها)
+    |--------------------------------------------------------------------------
+    | مجاز فقط برای ادمین و منشی سطح یک
+    | - لیست جوابدهی‌های ۲۴ ساعت اخیر
+    | - لیست بیماران ویرایش‌شده
+    | - ارسال دوباره‌ی لینک جوابدهی
+    */
+
+    Route::middleware('role:admin,staff_level_1')->prefix('dispatch')->group(function () {
+
+        Route::get('/recent', [
+            DispatchController::class,
+            'recent'
+        ]);
+
+        Route::get('/edited-patients', [
+            DispatchController::class,
+            'editedPatients'
+        ]);
+
+        Route::post('/archives/{id}/resend', [
+            DispatchController::class,
+            'resendArchive'
+        ])->whereNumber('id')->middleware('throttle:30,1');
+
+        Route::post('/patients/{id}/resend', [
+            DispatchController::class,
+            'resendPatient'
+        ])->whereNumber('id')->middleware('throttle:30,1');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
     | Invoices & Visits
     |--------------------------------------------------------------------------
     | استعلام وضعیت، مشاهده و دریافت لینک PDF برای همه کاربران لاگین‌شده
@@ -342,10 +376,11 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     | Resend Patient Portal SMS
     |--------------------------------------------------------------------------
+    | فقط ادمین و منشی سطح یک
     */
 
     Route::post('/archives/{id}/notify', [
         ArchiveController::class,
         'notifyPatient'
-    ])->middleware('throttle:5,1');
+    ])->middleware(['role:admin,staff_level_1', 'throttle:5,1']);
 });

@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class PatientController extends Controller
 {
+    /**
+     * فیلدهایی که تغییرشان بیمار را وارد لیست «مدیریت ارسالی‌ها» می‌کند.
+     */
+    private const TRACKED_FIELDS = ['full_name', 'file_number', 'national_code', 'mobile'];
+
     public function index(Request $request)
     {
         $query = Patient::query();
@@ -118,12 +124,24 @@ class PatientController extends Controller
             'mobile.regex'           => 'شماره موبایل نامعتبر است.',
         ]);
 
+        // مقادیر قبل از ویرایش (برای تشخیص تغییر واقعی)
+        $before = [];
+        foreach (self::TRACKED_FIELDS as $field) {
+            $before[$field] = trim((string) $patient->{$field});
+        }
+
         $patient->update($validated);
+
+        // ثبت ویرایش برای بخش «مدیریت ارسالی‌ها»
+        $this->trackDispatchChange($patient, $before);
+
+        $fresh = $patient->fresh() ?? $patient;
+        $fresh->makeHidden(['legacy_identifiers']);
 
         return response()->json([
             'status'  => 'success',
             'message' => 'اطلاعات بیمار به‌روزرسانی شد.',
-            'data'    => $patient
+            'data'    => $fresh
         ]);
     }
 
@@ -136,5 +154,65 @@ class PatientController extends Controller
             'status'  => 'success',
             'message' => 'بیمار با موفقیت حذف شد.'
         ]);
+    }
+
+    /**
+     * اگر یکی از فیلدهای اصلی بیمار واقعاً تغییر کرده باشد:
+     *  - edited_at ثبت می‌شود تا بیمار در لیست «بیماران ویرایش‌شده» بیاید
+     *  - کد ملی / شماره پرونده‌ی قبلی نگهداری می‌شود تا پرونده‌های بایگانی قدیمی پیدا شوند
+     *
+     * خطا در این بخش هرگز نباید ویرایش خود بیمار را خراب کند.
+     */
+    private function trackDispatchChange(Patient $patient, array $before): void
+    {
+        try {
+            $changed = [];
+            foreach (self::TRACKED_FIELDS as $field) {
+                if ($before[$field] !== trim((string) $patient->{$field})) {
+                    $changed[] = $field;
+                }
+            }
+
+            if (empty($changed)) {
+                return;
+            }
+
+            $legacy = $this->decodeLegacy($patient->getAttribute('legacy_identifiers'));
+
+            if (in_array('national_code', $changed, true) && $before['national_code'] !== '') {
+                $legacy['national_codes'][] = $before['national_code'];
+            }
+
+            if (in_array('file_number', $changed, true) && $before['file_number'] !== '') {
+                $legacy['file_numbers'][] = $before['file_number'];
+            }
+
+            $legacy['national_codes'] = array_values(array_unique($legacy['national_codes']));
+            $legacy['file_numbers']   = array_values(array_unique($legacy['file_numbers']));
+
+            Patient::query()->whereKey($patient->getKey())->update([
+                'edited_at'          => now(),
+                'legacy_identifiers' => json_encode($legacy, JSON_UNESCAPED_UNICODE),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Dispatch tracking failed for patient ' . $patient->getKey() . ': ' . $e->getMessage());
+        }
+    }
+
+    private function decodeLegacy($raw): array
+    {
+        $data = is_array($raw) ? $raw : (json_decode((string) $raw, true) ?: []);
+
+        $clean = function ($list) {
+            return array_values(array_unique(array_filter(
+                array_map('strval', (array) $list),
+                fn($v) => $v !== ''
+            )));
+        };
+
+        return [
+            'national_codes' => $clean($data['national_codes'] ?? []),
+            'file_numbers'   => $clean($data['file_numbers'] ?? []),
+        ];
     }
 }
