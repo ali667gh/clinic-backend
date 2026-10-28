@@ -254,7 +254,7 @@
             در تاریخ <strong>{{ fa_num($cert['date'] ?? '---') }}</strong>
             به مرکز آریتمی تهران مراجعه نموده و خدمات
             <strong>{{ $cert['services'] ?? '' }}</strong>
-            برای ایشان ثبت و انجام شده است.
+            برای ایشان ثبت و انجام شود
             @if($hasPrescription)
             <br>{!! nl2br(e($doctorPrescriptionText)) !!}
             @endif
