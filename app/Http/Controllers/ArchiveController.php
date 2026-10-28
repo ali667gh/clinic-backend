@@ -519,6 +519,13 @@ class ArchiveController extends Controller
 
     public function destroy($archive)
     {
+        // لایه امنیتی: تنها ادمین اجازه حذف دارد
+        if (!auth()->check() || auth()->user()->role !== 'admin') {
+            return response()->json([
+                'message' => 'شما دسترسی لازم برای حذف رکورد بایگانی را ندارید.'
+            ], 403);
+        }
+
         $model = $archive instanceof Archive ? $archive : Archive::findOrFail($archive);
 
         if ($model->attachments) {
@@ -545,6 +552,13 @@ class ArchiveController extends Controller
 
     public function bulkDelete(Request $request)
     {
+        // لایه امنیتی: تنها ادمین اجازه حذف گروهی دارد
+        if (!auth()->check() || auth()->user()->role !== 'admin') {
+            return response()->json([
+                'message' => 'شما دسترسی لازم برای حذف گروهی بایگانی‌ها را ندارید.'
+            ], 403);
+        }
+
         $request->validate([
             'from_date' => 'required|date',
             'to_date'   => 'required|date|after_or_equal:from_date',
