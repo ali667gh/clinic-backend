@@ -196,7 +196,7 @@ Route::middleware('auth:sanctum')->group(function () {
     | مجاز برای ادمین و منشی سطح یک
     */
 
-    Route::middleware('role:admin,staff_level_1')->group(function () {
+    Route::middleware('role:admin,staff_level_1,staff_level2')->group(function () {
 
         Route::get('/archives', [
             ArchiveController::class,
