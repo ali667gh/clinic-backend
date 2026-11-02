@@ -300,11 +300,13 @@ class ArchiveController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['mobile' => $this->normalizeMobile($request->input('mobile'))]);
+
         $validated = $request->validate([
             'patient_name'      => 'required|string|max:255',
             'national_code'     => 'required|string|max:20',
             'file_number'       => 'nullable|string|max:50',
-            'mobile'            => 'nullable|string|max:20',
+            'mobile' => ['nullable', 'string', 'regex:/^09[0-9]{9}$/'],
             'issued_at'         => 'required|date',
             'form_data'         => 'nullable',
             'created_by_name'   => 'nullable|string',
@@ -317,6 +319,8 @@ class ArchiveController extends Controller
             // شناسه خدمتِ هر فایل (هم‌اندیس با files[])؛ برای بررسی «پیوست اجباری»
             'file_services'     => 'nullable|array',
             'file_services.*'   => 'nullable|string|max:100',
+        ], [
+            'mobile.regex' => 'شماره موبایل باید با 09 شروع شده و ۱۱ رقم باشد (مثلاً 09123456789).',
         ]);
 
         $formData = $request->input('form_data');
@@ -478,7 +482,42 @@ class ArchiveController extends Controller
             'data'    => $archive,
         ], 201);
     }
+    private function normalizeMobile($value): ?string
+    {
+        $v = trim((string) $value);
+        if ($v === '') return null;
 
+        $v = strtr($v, [
+            '۰' => '0',
+            '۱' => '1',
+            '۲' => '2',
+            '۳' => '3',
+            '۴' => '4',
+            '۵' => '5',
+            '۶' => '6',
+            '۷' => '7',
+            '۸' => '8',
+            '۹' => '9',
+            '٠' => '0',
+            '١' => '1',
+            '٢' => '2',
+            '٣' => '3',
+            '٤' => '4',
+            '٥' => '5',
+            '٦' => '6',
+            '٧' => '7',
+            '٨' => '8',
+            '٩' => '9'
+        ]);
+        $v = preg_replace('/[\s\-()]/', '', $v);
+
+        if (str_starts_with($v, '+98'))      $v = '0' . substr($v, 3);
+        elseif (str_starts_with($v, '0098')) $v = '0' . substr($v, 4);
+        elseif (preg_match('/^98\d{10}$/', $v)) $v = '0' . substr($v, 2);
+        elseif (preg_match('/^9\d{9}$/', $v))   $v = '0' . $v;
+
+        return $v;
+    }
     public function notifyPatient($archiveId)
     {
         $archive = Archive::findOrFail($archiveId);
