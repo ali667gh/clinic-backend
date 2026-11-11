@@ -210,10 +210,10 @@
             @forelse ($items as $i => $item)
             <tr>
                 <td class="num">{{ $i + 1 }}</td>
-                <td>{{ $item['name'] ?? $item['title'] ?? '—' }}</td>
-                <td class="num">{{ $item['quantity'] ?? 1 }}</td>
-                <td class="num">{{ number_format($item['price'] ?? $item['amount'] ?? 0) }}</td>
-                <td class="num">{{ number_format(($item['quantity'] ?? 1) * ($item['price'] ?? $item['amount'] ?? 0)) }}</td>
+                <td>{{ $item['serviceTitle'] ?? $item['name'] ?? $item['title'] ?? '—' }}</td>
+                <td class="num">{{ $item['count'] ?? $item['quantity'] ?? 1 }}</td>
+                <td class="num">{{ number_format($item['price'] ?? 0) }}</td>
+                <td class="num">{{ number_format($item['total'] ?? (($item['count'] ?? 1) * ($item['price'] ?? 0))) }}</td>
             </tr>
             @empty
             <tr>
