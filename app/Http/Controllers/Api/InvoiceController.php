@@ -179,7 +179,7 @@ class InvoiceController extends Controller
     /**
      * خروجی PDF داخلی برای چاپ در مرکز (A5، تک‌صفحه، بدون مهر)
      */
-    public function internalPdf(Request $request, $id)
+    /*public function internalPdf(Request $request, $id)
     {
         $lookupKey = $id;
 
@@ -191,7 +191,7 @@ class InvoiceController extends Controller
         }
 
         return app(ArchiveController::class)->portalInvoiceInternalPdf($request, (string) $lookupKey);
-    }
+    }*/
 
     /**
      * بررسی وضعیت ویزیت یا فاکتور باز بیمار

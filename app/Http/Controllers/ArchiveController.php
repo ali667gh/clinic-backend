@@ -1263,15 +1263,18 @@ class ArchiveController extends Controller
     }
     public function internalInvoicePrint($id)
     {
-        $archive = \App\Models\Archive::with(['items', 'patient'])->findOrFail($id);
+        $archive = Archive::findOrFail($id);
 
-        $invoiceNumber = $archive->invoice_number ?? $archive->id;
-        $items         = $archive->items ?? collect();
-        $totalAmount   = $items->sum(fn($i) => $i->price * $i->quantity);
-        $discount      = $archive->discount ?? 0;
-        $payableAmount = $totalAmount - $discount;
-        $patientName   = optional($archive->patient)->full_name ?? '';
-        $mobile        = optional($archive->patient)->mobile ?? '';
+        $data            = json_decode($archive->form_data, true) ?? [];
+        $invoiceDetails  = $data['invoiceDetails'] ?? [];
+
+        $items         = $invoiceDetails['items']         ?? [];
+        $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? $archive->id;
+        $totalAmount   = $invoiceDetails['totalAmount']   ?? 0;
+        $discount      = $invoiceDetails['discount']      ?? 0;
+        $payableAmount = $invoiceDetails['payableAmount'] ?? 0;
+        $patientName   = $archive->patient_name           ?? '';
+        $mobile        = $archive->mobile                 ?? '';
         $createdAt     = $archive->created_at;
 
         $html = view('pdf.portal-invoice-internal-print', compact(
@@ -1286,8 +1289,11 @@ class ArchiveController extends Controller
             'createdAt'
         ))->render();
 
-        return response($html, 200)->header('Content-Type', 'text/html; charset=utf-8');
+        return response($html, 200)
+            ->header('Content-Type', 'text/html; charset=utf-8')
+            ->header('Access-Control-Allow-Origin', '*');
     }
+
 
 
 
