@@ -1255,6 +1255,12 @@ class ArchiveController extends Controller
 
         return $mpdf->Output('internal-' . $invoiceNumber . '.pdf', 'I');
     }
+    public function internalInvoiceHtml($id)
+    {
+        $archive = Archive::with(['patient', 'tests'])->findOrFail($id);
+        // همون view که برای pdf استفاده می‌کنی
+        return view('pdf.portal-invoice-internal', compact('archive'));
+    }
 
 
 
