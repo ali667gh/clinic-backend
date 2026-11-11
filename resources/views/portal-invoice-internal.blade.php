@@ -1,3 +1,4 @@
+{{-- portal-invoice-internal.blade.php (single A5, no stamps) --}}
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
@@ -36,19 +37,19 @@
         }
 
         .clinic-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             color: #1a365d;
         }
 
         .clinic-sub {
-            font-size: 9px;
+            font-size: 8.5px;
             color: #4a5568;
             margin-top: 1px;
         }
 
         .meta {
-            font-size: 8.5px;
+            font-size: 8px;
             color: #2d3748;
             text-align: left;
             line-height: 1.6;
@@ -59,35 +60,35 @@
             border-collapse: collapse;
             border: 1.2px solid #cbd5e0;
             background: #f7fafc;
-            margin: 4px 0 6px 0;
+            margin: 4px 0 5px 0;
         }
 
         .patient-bar td {
-            padding: 4px 7px;
-            font-size: 9.5px;
+            padding: 3px 7px;
+            font-size: 9px;
         }
 
         .cert-box {
             border: 1.2px dashed #94a3b8;
             background: #f8fafc;
-            padding: 7px 10px;
-            margin-bottom: 6px;
+            padding: 6px 10px;
+            margin-bottom: 5px;
             border-radius: 4px;
         }
 
         .cert-text {
-            font-size: 9.5px;
+            font-size: 9px;
             color: #2d3748;
-            line-height: 1.75;
+            line-height: 1.7;
             text-align: justify;
         }
 
         .section-title {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #1a365d;
-            margin: 4px 0;
+            margin: 3px 0;
         }
 
         .items-table {
@@ -100,16 +101,16 @@
             background: #edf2f7;
             color: #2d3748;
             border: 1.2px solid #cbd5e0;
-            padding: 4px 3px;
-            font-size: 8.5px;
+            padding: 3px 2px;
+            font-size: 8px;
             font-weight: bold;
             text-align: center;
         }
 
         .items-table td {
             border: 1.2px solid #cbd5e0;
-            padding: 3px;
-            font-size: 8.5px;
+            padding: 3px 2px;
+            font-size: 8px;
             text-align: center;
         }
 
@@ -120,23 +121,8 @@
 
         .sum-table td {
             border: 1.2px solid #cbd5e0;
-            padding: 4px 7px;
-            font-size: 9.5px;
-        }
-
-        .stamp-box {
-            height: 48px;
-            border: 1px dashed #94a3b8;
-            border-radius: 4px;
-            margin-top: 4px;
-        }
-
-        .doc-name {
-            font-weight: bold;
+            padding: 3px 7px;
             font-size: 9px;
-            color: #1a202c;
-            margin-top: 2px;
-            text-align: center;
         }
 
         .footer-table {
@@ -147,7 +133,7 @@
 
         .footer-table td {
             padding-top: 3px;
-            font-size: 8px;
+            font-size: 7.5px;
             color: #2d3748;
             vertical-align: top;
         }
@@ -161,6 +147,7 @@
     $hasPrescription = trim((string)($doctorPrescriptionText ?? '')) !== '';
     @endphp
 
+    {{-- فوتر mPDF --}}
     <htmlpagefooter name="internalFooter">
         <table class="footer-table" dir="ltr">
             <tr>
@@ -175,7 +162,6 @@
             </tr>
         </table>
     </htmlpagefooter>
-
     <sethtmlpagefooter name="internalFooter" value="on" />
 
     {{-- هدر --}}
@@ -183,7 +169,7 @@
         <tr>
             <td style="width:15%;text-align:left;padding-left:5px;">
                 @if(!empty($logo))
-                <img src="{{ $logo }}" alt="لوگو" style="height:40px;width:auto;">
+                <img src="{{ $logo }}" alt="لوگو" style="height:38px;width:auto;">
                 @endif
             </td>
             <td style="width:55%;text-align:right;">
@@ -247,37 +233,16 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" style="padding:8px;color:#a0aec0;">هیچ ردیف خدمتی ثبت نشده است.</td>
+                <td colspan="5" style="padding:6px;color:#a0aec0;">هیچ ردیف خدمتی ثبت نشده است.</td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{-- جمع‌بندی + جای خالی امضا کنار هم --}}
-    <table style="width:100%;margin-top:7px;border-collapse:collapse;">
+    {{-- جمع‌بندی --}}
+    <table style="width:100%;margin-top:6px;border-collapse:collapse;">
         <tr>
-            {{-- جای خالی مهر و امضا – بدون تصویر --}}
-            <td style="width:50%;vertical-align:top;padding-left:6px;">
-                <div style="font-weight:bold;font-size:9.5px;color:#2d3748;
-                        border-bottom:1px solid #cbd5e0;padding-bottom:3px;margin-bottom:4px;">
-                    مهر و امضای پزشک:
-                </div>
-                <table style="width:100%;border-collapse:collapse;">
-                    <tr>
-                        @forelse($visitDoctors as $doc)
-                        <td style="text-align:center;padding:2px;">
-                            <div class="stamp-box"></div>
-                            <div class="doc-name">{{ $doc['name'] ?? '' }}</div>
-                        </td>
-                        @empty
-                        <td>
-                            <div class="stamp-box"></div>
-                        </td>
-                        @endforelse
-                    </tr>
-                </table>
-            </td>
-            {{-- مبالغ --}}
+            <td style="width:50%;"></td>
             <td style="width:50%;vertical-align:top;">
                 <table class="sum-table">
                     <tr>
