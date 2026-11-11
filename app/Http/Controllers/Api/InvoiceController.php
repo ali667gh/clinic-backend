@@ -176,6 +176,22 @@ class InvoiceController extends Controller
         // فراخوانی مستقیم منطق کامل mPDF که در ArchiveController پیاده‌سازی شده است
         return app(ArchiveController::class)->portalInvoicePdf($request, (string) $lookupKey);
     }
+    /**
+     * خروجی PDF داخلی برای چاپ در مرکز (A5، تک‌صفحه، بدون مهر)
+     */
+    public function internalPdf(Request $request, $id)
+    {
+        $lookupKey = $id;
+
+        $invoice = Invoice::with('archive')->find($id);
+        if ($invoice && !empty($invoice->archive?->tracking_token)) {
+            $lookupKey = $invoice->archive->tracking_token;
+        } elseif ($invoice && !empty($invoice->archive_id)) {
+            $lookupKey = $invoice->archive_id;
+        }
+
+        return app(ArchiveController::class)->portalInvoiceInternalPdf($request, (string) $lookupKey);
+    }
 
     /**
      * بررسی وضعیت ویزیت یا فاکتور باز بیمار

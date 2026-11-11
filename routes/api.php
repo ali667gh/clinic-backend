@@ -287,6 +287,9 @@ Route::middleware('auth:sanctum')->group(function () {
             ),
         ]);
     });
+    Route::middleware('auth')->get('/archives/{archive}/internal-pdf', [ArchiveController::class, 'internalInvoicePdf']);
+
+
 
     Route::middleware('role:admin,staff_level_1')->group(function () {
 

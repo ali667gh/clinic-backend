@@ -1215,6 +1215,47 @@ class ArchiveController extends Controller
             'Cache-Control'       => 'no-store, no-cache, must-revalidate',
         ]);
     }
+    public function internalInvoicePdf($id)
+    {
+        $archive = Archive::findOrFail($id);
+        $data = is_string($archive->form_data)
+            ? json_decode($archive->form_data, true)
+            : ($archive->form_data ?? []);
+
+        $invoiceDetails = $data['invoiceDetails'] ?? [];
+        $items = $invoiceDetails['items'] ?? [];
+
+        $totalAmount = collect($items)->sum(fn($i) => (float)($i['price'] ?? 0));
+        $discount = (float)($invoiceDetails['discount'] ?? 0);
+        $payableAmount = $totalAmount - $discount;
+        $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? ('INV-' . $archive->id);
+
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A5',
+            'orientation' => 'P',
+            'margin_left'   => 8,
+            'margin_right'  => 8,
+            'margin_top'    => 8,
+            'margin_bottom' => 8,
+        ]);
+
+        $html = view('pdf.portal-invoice-internal', [
+            'archive'       => $archive,
+            'invoiceNumber' => $invoiceNumber,
+            'items'         => $items,
+            'totalAmount'   => $totalAmount,
+            'discount'      => $discount,
+            'payableAmount' => $payableAmount,
+            'patientName'   => $data['patientName'] ?? $archive->patient_name ?? '',
+            'mobile'        => $data['mobile'] ?? $archive->mobile ?? '',
+            'createdAt'     => $invoiceDetails['created_at'] ?? now()->toDateTimeString(),
+        ])->render();
+
+        $mpdf->WriteHTML($html);
+
+        return $mpdf->Output('internal-' . $invoiceNumber . '.pdf', 'I');
+    }
+
 
 
     private function resolveImageUrl(?string $path): ?string
