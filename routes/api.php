@@ -294,6 +294,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/archives/{archive}/internal-html', [ArchiveController::class, 'internalInvoiceHtml'])
         ->middleware('auth:sanctum');
     Route::get('/archives/{id}/internal-print', [ArchiveController::class, 'internalInvoicePrint']);
+    
 
 
 

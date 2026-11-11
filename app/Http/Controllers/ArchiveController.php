@@ -1261,19 +1261,34 @@ class ArchiveController extends Controller
         // همون view که برای pdf استفاده می‌کنی
         return view('pdf.portal-invoice-internal', compact('archive'));
     }
-    public function internalInvoicePrint(int $id)
+    public function internalInvoicePrint($id)
     {
-        // همان data prep که در internalInvoicePdf داری
-        $archive = Archive::with(['patient', 'invoiceRows', 'doctor'])->findOrFail($id);
+        $archive = \App\Models\Archive::with(['items', 'patient'])->findOrFail($id);
 
-        // ... هر داده‌ای که به view پاس می‌دی ...
-        $data = $this->buildInvoiceData($archive); // یا inline همان کد
+        $invoiceNumber = $archive->invoice_number ?? $archive->id;
+        $items         = $archive->items ?? collect();
+        $totalAmount   = $items->sum(fn($i) => $i->price * $i->quantity);
+        $discount      = $archive->discount ?? 0;
+        $payableAmount = $totalAmount - $discount;
+        $patientName   = optional($archive->patient)->full_name ?? '';
+        $mobile        = optional($archive->patient)->mobile ?? '';
+        $createdAt     = $archive->created_at;
 
-        return response()
-            ->view('pdf.portal-invoice-internal', $data)
-            ->header('Content-Type', 'text/html; charset=UTF-8')
-            ->header('X-Frame-Options', 'SAMEORIGIN');
+        $html = view('pdf.portal-invoice-internal-print', compact(
+            'archive',
+            'invoiceNumber',
+            'items',
+            'totalAmount',
+            'discount',
+            'payableAmount',
+            'patientName',
+            'mobile',
+            'createdAt'
+        ))->render();
+
+        return response($html, 200)->header('Content-Type', 'text/html; charset=utf-8');
     }
+
 
 
 
