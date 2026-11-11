@@ -1261,6 +1261,19 @@ class ArchiveController extends Controller
         // همون view که برای pdf استفاده می‌کنی
         return view('pdf.portal-invoice-internal', compact('archive'));
     }
+    public function internalInvoicePrint(int $id)
+    {
+        // همان data prep که در internalInvoicePdf داری
+        $archive = Archive::with(['patient', 'invoiceRows', 'doctor'])->findOrFail($id);
+
+        // ... هر داده‌ای که به view پاس می‌دی ...
+        $data = $this->buildInvoiceData($archive); // یا inline همان کد
+
+        return response()
+            ->view('pdf.portal-invoice-internal', $data)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('X-Frame-Options', 'SAMEORIGIN');
+    }
 
 
 
