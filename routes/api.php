@@ -193,7 +193,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     | Archives
     |--------------------------------------------------------------------------
-    | مجاز برای ادمین و منشی سطح یک
+    | مجاز برای ادمین و منشی سطح یک و دو
     */
 
     Route::middleware('role:admin,staff_level_1,staff_level_2')->group(function () {
@@ -217,6 +217,25 @@ Route::middleware('auth:sanctum')->group(function () {
             ArchiveController::class,
             'downloadAttachment'
         ])->whereNumber('index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Internal Invoice (فاکتور داخلی)
+        |--------------------------------------------------------------------------
+        | همان نقش‌های مجاز به آرشیو؛ احراز هویت از گروه بیرونی اعمال می‌شود.
+        | - internal-pdf   : خروجی PDF (mPDF)
+        | - internal-print : HTML آماده‌ی پرینت برای iframe فرانت‌اند
+        */
+
+        Route::get('/archives/{id}/internal-pdf', [
+            ArchiveController::class,
+            'internalInvoicePdf'
+        ])->whereNumber('id');
+
+        Route::get('/archives/{id}/internal-print', [
+            ArchiveController::class,
+            'internalInvoicePrint'
+        ])->whereNumber('id');
     });
 
     /*
@@ -287,16 +306,6 @@ Route::middleware('auth:sanctum')->group(function () {
             ),
         ]);
     });
-    Route::middleware('auth:sanctum')->get('/archives/{archive}/internal-pdf', [
-        ArchiveController::class,
-        'internalInvoicePdf'
-    ]);
-    Route::get('/archives/{archive}/internal-html', [ArchiveController::class, 'internalInvoiceHtml'])
-        ->middleware('auth:sanctum');
-    Route::get('/archives/{id}/internal-print', [ArchiveController::class, 'internalInvoicePrint']);
-    
-
-
 
     Route::middleware('role:admin,staff_level_1')->group(function () {
 

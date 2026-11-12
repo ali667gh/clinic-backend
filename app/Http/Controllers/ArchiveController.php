@@ -1261,21 +1261,34 @@ class ArchiveController extends Controller
         // همون view که برای pdf استفاده می‌کنی
         return view('pdf.portal-invoice-internal', compact('archive'));
     }
+    /**
+     * HTML آماده‌ی پرینت فاکتور داخلی (برای iframe در فرانت‌اند)
+     * روت: GET /api/archives/{id}/internal-print  (auth:sanctum + role)
+     */
     public function internalInvoicePrint($id)
     {
         $archive = Archive::findOrFail($id);
 
-        $data            = json_decode($archive->form_data, true) ?? [];
-        $invoiceDetails  = $data['invoiceDetails'] ?? [];
+        // form_data ممکن است cast به آرایه شده باشد یا رشته‌ی JSON باشد
+        $data = is_string($archive->form_data)
+            ? (json_decode($archive->form_data, true) ?? [])
+            : ($archive->form_data ?? []);
 
-        $items         = $invoiceDetails['items']         ?? [];
-        $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? $archive->id;
-        $totalAmount   = $invoiceDetails['totalAmount']   ?? 0;
-        $discount      = $invoiceDetails['discount']      ?? 0;
-        $payableAmount = $invoiceDetails['payableAmount'] ?? 0;
-        $patientName   = $archive->patient_name           ?? '';
-        $mobile        = $archive->mobile                 ?? '';
-        $createdAt     = $archive->created_at;
+        $invoiceDetails = $data['invoiceDetails'] ?? [];
+        $items          = $invoiceDetails['items'] ?? [];
+
+        // جمع هر ردیف دقیقاً مثل قالب: total یا (count × price)
+        $totalAmount = collect($items)->sum(function ($i) {
+            $qty = (float) ($i['count'] ?? $i['quantity'] ?? 1);
+            return (float) ($i['total'] ?? ($qty * (float) ($i['price'] ?? 0)));
+        });
+
+        $discount      = (float) ($invoiceDetails['discount'] ?? 0);
+        $payableAmount = max($totalAmount - $discount, 0);
+        $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? ('INV-' . $archive->id);
+        $patientName   = $data['patientName'] ?? $archive->patient_name ?? '';
+        $mobile        = $data['mobile'] ?? $archive->mobile ?? '';
+        $createdAt     = $invoiceDetails['created_at'] ?? $archive->created_at;
 
         $html = view('pdf.portal-invoice-internal-print', compact(
             'archive',
@@ -1291,7 +1304,7 @@ class ArchiveController extends Controller
 
         return response($html, 200)
             ->header('Content-Type', 'text/html; charset=utf-8')
-            ->header('Access-Control-Allow-Origin', '*');
+            ->header('Cache-Control', 'no-store, private'); // اطلاعات بیمار کش نشود
     }
 
 
