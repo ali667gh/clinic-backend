@@ -1290,7 +1290,7 @@ class ArchiveController extends Controller
         $mobile        = $data['mobile'] ?? $archive->mobile ?? '';
         $createdAt     = $invoiceDetails['created_at'] ?? $archive->created_at;
 
-        $html = view('pdf.portal-invoice-internal-print', compact(
+        $html = view('pdf.portal-invoice-internal', compact(
             'archive',
             'invoiceNumber',
             'items',
