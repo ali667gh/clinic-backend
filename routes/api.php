@@ -231,11 +231,6 @@ Route::middleware('auth:sanctum')->group(function () {
             ArchiveController::class,
             'internalInvoicePdf'
         ])->whereNumber('id');
-
-        Route::get('/archives/{id}/internal', [
-            ArchiveController::class,
-            'internalInvoicePrint'
-        ])->whereNumber('id');
     });
 
     /*

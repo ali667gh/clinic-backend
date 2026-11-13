@@ -1215,29 +1215,35 @@ class ArchiveController extends Controller
             'Cache-Control'       => 'no-store, no-cache, must-revalidate',
         ]);
     }
+    /**
+     * PDF فاکتور داخلی (تک‌صفحه، بدون مهر و امضا)
+     * روت: GET /api/archives/{id}/internal-pdf  (auth:sanctum + role)
+     * view: resources/views/pdf/portal-invoice-internal.blade.php
+     */
     public function internalInvoicePdf($id)
     {
         $archive = Archive::findOrFail($id);
+
         $data = is_string($archive->form_data)
-            ? json_decode($archive->form_data, true)
+            ? (json_decode($archive->form_data, true) ?? [])
             : ($archive->form_data ?? []);
 
         $invoiceDetails = $data['invoiceDetails'] ?? [];
-        $items = $invoiceDetails['items'] ?? [];
+        $items          = $invoiceDetails['items'] ?? [];
 
-        $totalAmount = collect($items)->sum(fn($i) => (float)($i['price'] ?? 0));
-        $discount = (float)($invoiceDetails['discount'] ?? 0);
-        $payableAmount = $totalAmount - $discount;
+        $totalAmount = collect($items)->sum(function ($i) {
+            $qty = (float) ($i['count'] ?? $i['quantity'] ?? 1);
+            return (float) ($i['total'] ?? ($qty * (float) ($i['price'] ?? 0)));
+        });
+        $discount      = (float) ($invoiceDetails['discount'] ?? 0);
+        $payableAmount = max($totalAmount - $discount, 0);
         $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? ('INV-' . $archive->id);
 
-        $mpdf = new \Mpdf\Mpdf([
-            'format' => 'A5',
-            'orientation' => 'P',
-            'margin_left'   => 8,
-            'margin_right'  => 8,
-            'margin_top'    => 8,
-            'margin_bottom' => 8,
-        ]);
+        $logo = $this->resolveImageUrl('images/logo.png')
+            ?? $this->resolveImageUrl('images/logo.jpg')
+            ?? $this->resolveImageUrl('images/logo.jpeg')
+            ?? $this->resolveImageUrl('logo.png')
+            ?? $this->resolveImageUrl('logo.jpg');
 
         $html = view('pdf.portal-invoice-internal', [
             'archive'       => $archive,
@@ -1248,68 +1254,41 @@ class ArchiveController extends Controller
             'payableAmount' => $payableAmount,
             'patientName'   => $data['patientName'] ?? $archive->patient_name ?? '',
             'mobile'        => $data['mobile'] ?? $archive->mobile ?? '',
-            'createdAt'     => $invoiceDetails['created_at'] ?? now()->toDateTimeString(),
+            'createdAt'     => $invoiceDetails['created_at'] ?? $archive->created_at ?? now()->toDateTimeString(),
+            'logo'          => $logo,
         ])->render();
 
+        ini_set('pcre.backtrack_limit', '50000000');
+        ini_set('pcre.recursion_limit', '20000000');
+        ini_set('memory_limit', '512M');
+
+        $tempDir = storage_path('app/mpdf');
+        File::ensureDirectoryExists($tempDir);
+
+        $mpdf = new Mpdf([
+            'mode'                 => 'utf-8',
+            'format'               => 'A4',
+            'default_font'         => 'dejavusans',
+            'margin_top'           => 10,
+            'margin_bottom'        => 20,
+            'margin_footer'        => 5,
+            'margin_left'          => 8,
+            'margin_right'         => 8,
+            'tempDir'              => $tempDir,
+            'autoScriptToLang'     => true,
+            'autoLangToFont'       => true,
+            'shrink_tables_to_fit' => 1,
+        ]);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->SetTitle('internal-' . $invoiceNumber);
         $mpdf->WriteHTML($html);
 
-        return $mpdf->Output('internal-' . $invoiceNumber . '.pdf', 'I');
+        return response($mpdf->Output('internal.pdf', Destination::STRING_RETURN), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="internal-' . $invoiceNumber . '.pdf"',
+            'Cache-Control'       => 'no-store, private',
+        ]);
     }
-    public function internalInvoiceHtml($id)
-    {
-        $archive = Archive::with(['patient', 'tests'])->findOrFail($id);
-        // همون view که برای pdf استفاده می‌کنی
-        return view('pdf.portal-invoice-internal', compact('archive'));
-    }
-    /**
-     * HTML آماده‌ی پرینت فاکتور داخلی (برای iframe در فرانت‌اند)
-     * روت: GET /api/archives/{id}/internal-print  (auth:sanctum + role)
-     */
-    public function internalInvoicePrint($id)
-    {
-        $archive = Archive::findOrFail($id);
-
-        // form_data ممکن است cast به آرایه شده باشد یا رشته‌ی JSON باشد
-        $data = is_string($archive->form_data)
-            ? (json_decode($archive->form_data, true) ?? [])
-            : ($archive->form_data ?? []);
-
-        $invoiceDetails = $data['invoiceDetails'] ?? [];
-        $items          = $invoiceDetails['items'] ?? [];
-
-        // جمع هر ردیف دقیقاً مثل قالب: total یا (count × price)
-        $totalAmount = collect($items)->sum(function ($i) {
-            $qty = (float) ($i['count'] ?? $i['quantity'] ?? 1);
-            return (float) ($i['total'] ?? ($qty * (float) ($i['price'] ?? 0)));
-        });
-
-        $discount      = (float) ($invoiceDetails['discount'] ?? 0);
-        $payableAmount = max($totalAmount - $discount, 0);
-        $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? ('INV-' . $archive->id);
-        $patientName   = $data['patientName'] ?? $archive->patient_name ?? '';
-        $mobile        = $data['mobile'] ?? $archive->mobile ?? '';
-        $createdAt     = $invoiceDetails['created_at'] ?? $archive->created_at;
-
-        $html = view('pdf.portal-invoice-internal', compact(
-            'archive',
-            'invoiceNumber',
-            'items',
-            'totalAmount',
-            'discount',
-            'payableAmount',
-            'patientName',
-            'mobile',
-            'createdAt'
-        ))->render();
-
-        return response($html, 200)
-            ->header('Content-Type', 'text/html; charset=utf-8')
-            ->header('Cache-Control', 'no-store, private'); // اطلاعات بیمار کش نشود
-    }
-
-
-
-
 
     private function resolveImageUrl(?string $path): ?string
     {
