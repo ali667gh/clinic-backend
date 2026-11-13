@@ -1245,7 +1245,7 @@ class ArchiveController extends Controller
             ?? $this->resolveImageUrl('logo.png')
             ?? $this->resolveImageUrl('logo.jpg');
 
-        $html = view('pdf.portal-invoice-internal-pdf', [
+        $html = view('pdf.portal-invoice-internal', [
             'archive'       => $archive,
             'invoiceNumber' => $invoiceNumber,
             'items'         => $items,
@@ -1283,7 +1283,7 @@ class ArchiveController extends Controller
         $mpdf->SetTitle('internal-' . $invoiceNumber);
         $mpdf->WriteHTML($html);
 
-        return response($mpdf->Output('internal.pdf', Destination::STRING_RETURN), 200, [
+        return response($mpdf->Output('internal', Destination::STRING_RETURN), 200, [
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'inline; filename="internal-' . $invoiceNumber . '.pdf"',
             'Cache-Control'       => 'no-store, private',
