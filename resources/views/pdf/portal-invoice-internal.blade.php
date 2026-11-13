@@ -5,7 +5,6 @@
 <head>
     <meta charset="UTF-8">
     <title>فاکتور داخلی – مرکز آریتمی تهران</title>
-
     <style>
         @page {
             margin-top: 10mm;
@@ -129,6 +128,24 @@
             font-size: 11px;
         }
 
+        .prescription-box {
+            border: 1.5px dashed #90cdf4;
+            background-color: #ebf8ff;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #2c5282;
+            line-height: 1.8;
+        }
+
+        .prescription-title {
+            font-weight: bold;
+            color: #1a365d;
+            font-size: 11.5px;
+            margin-bottom: 4px;
+        }
+
         .footer-table {
             width: 100%;
             border-top: 2px solid #0f766e;
@@ -147,7 +164,7 @@
 <body>
 
     @php
-    // ── تاریخ — بدون وابستگی به Jalalian ──────────────────────────────
+    // ── تاریخ ──────────────────────────────────────────────────────────
     $displayDate = '---';
     try {
     $displayDate = \Carbon\Carbon::parse($createdAt)->format('Y/m/d');
@@ -159,11 +176,8 @@
     $fileNumber = $archive->file_number ?? $archive->id ?? '---';
     $nationalCode = $archive->national_code ?? '---';
 
-    // ── جمع اقلام (محاسبه مجدد از items برای اطمینان) ─────────────────
-    $calcTotal = collect($items)->sum(function($i) {
-    $qty = (float)($i['count'] ?? $i['quantity'] ?? 1);
-    return (float)($i['total'] ?? ($qty * (float)($i['price'] ?? 0)));
-    });
+    // ── جمع از rows ────────────────────────────────────────────────────
+    $calcTotal = collect($rows)->sum('amount');
     $finalTotal = $totalAmount > 0 ? $totalAmount : $calcTotal;
     $finalPayable = $payableAmount > 0 ? $payableAmount : max($calcTotal - (float)$discount, 0);
     @endphp
@@ -182,7 +196,6 @@
             </tr>
         </table>
     </htmlpagefooter>
-
     <sethtmlpagefooter name="clinicFooter" value="on" />
 
     {{-- ── هدر کلینیک ── --}}
@@ -245,24 +258,22 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($items as $index => $item)
+            @forelse($rows as $index => $row)
             <tr>
                 <td>
                     @if(function_exists('fa_num')) {{ fa_num($index + 1) }}
                     @else {{ $index + 1 }} @endif
                 </td>
                 <td style="font-size: 10px;">
-                    @if(function_exists('fa_num')) {{ fa_num($item['serviceId'] ?? '---') }}
-                    @else {{ $item['serviceId'] ?? '---' }} @endif
+                    @if(function_exists('fa_num')) {{ fa_num($row['code'] ?? '---') }}
+                    @else {{ $row['code'] ?? '---' }} @endif
                 </td>
                 <td style="text-align: right; padding-right: 8px;">
-                    {{ $item['serviceTitle'] ?? '' }}
+                    {{ $row['service_name'] ?? '' }}
                 </td>
-                <td>{{ $item['doctorName'] ?? '---' }}</td>
+                <td>{{ $row['doctor_name'] ?? '---' }}</td>
                 <td>
-                    @php
-                    $rowAmt = (float)($item['total'] ?? $item['price'] ?? 0);
-                    @endphp
+                    @php $rowAmt = (float)($row['amount'] ?? 0); @endphp
                     @if(function_exists('fa_num')) {{ fa_num($rowAmt, true) }}
                     @else {{ number_format($rowAmt) }} @endif
                 </td>
@@ -314,6 +325,14 @@
             </td>
         </tr>
     </table>
+
+    {{-- ── دستور پزشک ── --}}
+    @if(!empty($doctorPrescriptionText))
+    <div class="prescription-box">
+        <div class="prescription-title">دستور پزشک / توضیحات تکمیلی:</div>
+        <div>{{ $doctorPrescriptionText }}</div>
+    </div>
+    @endif
 
 </body>
 

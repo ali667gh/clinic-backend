@@ -1229,16 +1229,153 @@ class ArchiveController extends Controller
             : ($archive->form_data ?? []);
 
         $invoiceDetails = $data['invoiceDetails'] ?? [];
-        $items          = $invoiceDetails['items'] ?? [];
+        $serviceList    = $data['services'] ?? [];
 
-        $totalAmount = collect($items)->sum(function ($i) {
-            $qty = (float) ($i['count'] ?? $i['quantity'] ?? 1);
-            return (float) ($i['total'] ?? ($qty * (float) ($i['price'] ?? 0)));
-        });
+        // ── کمک‌کننده‌ها ──────────────────────────────────────────────────
+        $pick = function (array $arr, array $keys) {
+            foreach ($keys as $k) {
+                if (isset($arr[$k]) && $arr[$k] !== '' && $arr[$k] !== null) {
+                    return $arr[$k];
+                }
+            }
+            return null;
+        };
+
+        $findService = function ($sid) {
+            $sid = (string) $sid;
+            if ($sid === '' || $sid === 'other') {
+                return null;
+            }
+            $rec = ctype_digit($sid) ? \App\Models\Service::find((int) $sid) : null;
+            return $rec ?: \App\Models\Service::where('code', $sid)->first();
+        };
+
+        // صف متادیتای هر خدمت (برای چند پزشک با یک serviceId)
+        $serviceMetaQueue = [];
+        foreach ($serviceList as $s) {
+            $serviceMetaQueue[(string) ($s['serviceId'] ?? '')][] = $s;
+        }
+
+        // ── ساخت ردیف‌ها با expand زیرخدمت‌ها ─────────────────────────────
+        $rows     = [];
+        $expanded = false;
+
+        foreach (($invoiceDetails['items'] ?? []) as $item) {
+            $sid        = (string) ($item['serviceId'] ?? '');
+            $meta       = !empty($serviceMetaQueue[$sid]) ? array_shift($serviceMetaQueue[$sid]) : [];
+            $qty        = max(1, (int) ($item['count'] ?? 1));
+            $doctorName = $item['doctorName'] ?? $meta['doctorName'] ?? null;
+
+            $parentRec  = $findService($sid);
+            $parentName = $item['serviceTitle'] ?? $meta['serviceTitle'] ?? $parentRec?->name ?? 'خدمت درمانی';
+
+            // زیرخدمت‌های ذخیره‌شده در آیتم
+            $subs = $pick($item, ['children', 'subItems', 'sub_items', 'subservices', 'subServices']);
+            $subs = is_array($subs) ? $subs : [];
+
+            if (empty($subs)) {
+                $childId    = $pick($item, ['subserviceId', 'subServiceId', 'subservice_id', 'childId', 'child_id', 'itemId']);
+                $childTitle = $pick($item, ['subserviceTitle', 'subserviceName', 'subservice_name', 'childTitle', 'itemTitle', 'item_title']);
+                if ($childId !== null || $childTitle !== null) {
+                    $subs = [[
+                        'id'    => $childId,
+                        'title' => $childTitle,
+                        'price' => $item['price'] ?? null,
+                        'count' => $qty,
+                        'total' => $item['total'] ?? null,
+                    ]];
+                }
+            }
+
+            // اگر زیرخدمتی ذخیره نشده، از دیتابیس بارگذاری شود (غیر ویزیت)
+            if (empty($subs) && $parentRec && !$parentRec->is_visit) {
+                foreach ($parentRec->children as $child) {
+                    $subs[] = [
+                        'id'    => $child->id,
+                        'title' => $child->name,
+                        'price' => $child->price,
+                        'count' => 1,
+                        'code'  => $child->code,
+                    ];
+                }
+                if (!empty($subs)) {
+                    $expanded = true;
+                }
+            }
+
+            if (!empty($subs)) {
+                foreach ($subs as $sub) {
+                    $subId  = $pick($sub, ['id', 'serviceId', 'subserviceId']);
+                    $subRec = ($subId !== null && ctype_digit((string) $subId))
+                        ? \App\Models\Service::find((int) $subId)
+                        : null;
+                    $subQty = max(1, (int) ($sub['count'] ?? 1));
+                    $price  = (float) ($sub['price'] ?? $subRec?->price ?? 0);
+                    $total  = isset($sub['total']) ? (float) $sub['total'] : $price * $subQty;
+                    $code   = $sub['code'] ?? $subRec?->code ?? '-';
+
+                    $rows[] = [
+                        'code'         => $code ?: '-',
+                        'parent_name'  => $parentName,
+                        'service_name' => $pick($sub, ['title', 'name', 'serviceTitle']) ?? $subRec?->name ?? $parentName,
+                        'amount'       => $total,
+                        'doctor_name'  => $doctorName,
+                    ];
+                }
+                continue;
+            }
+
+            // خدمت بدون زیرخدمت (مثل ویزیت)
+            $code = $meta['serviceCode'] ?? $meta['service_code'] ?? '-';
+            if (($code === '-' || $code === '' || $code === null) && $parentRec) {
+                $code = $parentRec->code ?: '-';
+            }
+
+            $rows[] = [
+                'code'         => $code ?: '-',
+                'parent_name'  => null,
+                'service_name' => $parentName,
+                'amount'       => (float) ($item['total'] ?? (($item['price'] ?? 0) * $qty)),
+                'doctor_name'  => $doctorName,
+            ];
+        }
+
+        // fallback اگر items خالی بود
+        if (empty($rows)) {
+            foreach ($serviceList as $s) {
+                $rows[] = [
+                    'code'         => $s['serviceCode'] ?? $s['service_code'] ?? '-',
+                    'parent_name'  => null,
+                    'service_name' => $s['serviceTitle'] ?? 'خدمت درمانی',
+                    'amount'       => 0.0,
+                    'doctor_name'  => $s['doctorName'] ?? null,
+                ];
+            }
+        }
+
+        // ── محاسبات ───────────────────────────────────────────────────────
+        $totalAmount = array_sum(array_column($rows, 'amount'));
+        $calcTotal   = (float) ($invoiceDetails['totalAmount'] ?? $totalAmount);
+        if ($expanded || ($calcTotal <= 0 && $totalAmount > 0)) {
+            $calcTotal = (float) $totalAmount;
+        }
         $discount      = (float) ($invoiceDetails['discount'] ?? 0);
-        $payableAmount = max($totalAmount - $discount, 0);
+        $payableAmount = max($calcTotal - $discount, 0);
         $invoiceNumber = $invoiceDetails['invoiceNumber'] ?? ('INV-' . $archive->id);
 
+        // ── دستور پزشک ────────────────────────────────────────────────────
+        $doctorPrescriptionText = $data['doctorPrescriptionText']
+            ?? $data['prescription']
+            ?? $data['doctor_note']
+            ?? $invoiceDetails['doctorPrescriptionText']
+            ?? $invoiceDetails['prescription']
+            ?? $invoiceDetails['doctor_note']
+            ?? '';
+        if (is_array($doctorPrescriptionText)) {
+            $doctorPrescriptionText = implode("\n", array_filter($doctorPrescriptionText));
+        }
+
+        // ── لوگو ──────────────────────────────────────────────────────────
         $logo = $this->resolveImageUrl('images/logo.png')
             ?? $this->resolveImageUrl('images/logo.jpg')
             ?? $this->resolveImageUrl('images/logo.jpeg')
@@ -1246,16 +1383,17 @@ class ArchiveController extends Controller
             ?? $this->resolveImageUrl('logo.jpg');
 
         $html = view('pdf.portal-invoice-internal', [
-            'archive'       => $archive,
-            'invoiceNumber' => $invoiceNumber,
-            'items'         => $items,
-            'totalAmount'   => $totalAmount,
-            'discount'      => $discount,
-            'payableAmount' => $payableAmount,
-            'patientName'   => $data['patientName'] ?? $archive->patient_name ?? '',
-            'mobile'        => $data['mobile'] ?? $archive->mobile ?? '',
-            'createdAt'     => $invoiceDetails['created_at'] ?? $archive->created_at ?? now()->toDateTimeString(),
-            'logo'          => $logo,
+            'archive'                => $archive,
+            'invoiceNumber'          => $invoiceNumber,
+            'rows'                   => $rows,
+            'totalAmount'            => $calcTotal,
+            'discount'               => $discount,
+            'payableAmount'          => $payableAmount,
+            'patientName'            => $data['patientName'] ?? $archive->patient_name ?? '',
+            'mobile'                 => $data['mobile'] ?? $archive->mobile ?? '',
+            'createdAt'              => $invoiceDetails['created_at'] ?? $archive->created_at ?? now()->toDateTimeString(),
+            'logo'                   => $logo,
+            'doctorPrescriptionText' => $doctorPrescriptionText,
         ])->render();
 
         ini_set('pcre.backtrack_limit', '50000000');
@@ -1289,6 +1427,7 @@ class ArchiveController extends Controller
             'Cache-Control'       => 'no-store, private',
         ]);
     }
+
 
     private function resolveImageUrl(?string $path): ?string
     {
