@@ -4,78 +4,30 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>فاکتور داخلی</title>
+    <title>فاکتور داخلی – مرکز آریتمی تهران</title>
+
     <style>
         @page {
-            size: A5 portrait;
-            margin: 10mm 10mm 15mm 10mm;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            margin-top: 10mm;
+            margin-bottom: 20mm;
+            margin-left: 8mm;
+            margin-right: 8mm;
+            margin-footer: 5mm;
+            odd-footer-name: clinicFooter;
+            even-footer-name: clinicFooter;
         }
 
         body {
-            font-family: 'Vazirmatn', Vazir, Tahoma, 'Arial Unicode MS', sans-serif;
+            font-family: 'dejavusans', 'tahoma', sans-serif;
             font-size: 11px;
             color: #1a202c;
             direction: rtl;
             text-align: right;
             line-height: 1.6;
-            background: #fff;
+            margin: 0;
+            padding: 0;
         }
 
-        /* ── header ── */
-        .head-table {
-            width: 100%;
-            border-collapse: collapse;
-            border-bottom: 2px solid #cbd5e0;
-            padding-bottom: 6px;
-            margin-bottom: 6px;
-        }
-
-        .head-table td {
-            padding: 3px 5px 7px 5px;
-            vertical-align: middle;
-        }
-
-        .clinic-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1a365d;
-        }
-
-        .clinic-sub {
-            font-size: 10.5px;
-            color: #4a5568;
-            margin-top: 2px;
-        }
-
-        .meta {
-            font-size: 10px;
-            color: #2d3748;
-            text-align: left;
-            line-height: 1.8;
-        }
-
-        /* ── patient bar ── */
-        .patient-bar {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1.5px solid #cbd5e0;
-            background-color: #f7fafc;
-            margin-bottom: 8px;
-            border-radius: 4px;
-        }
-
-        .patient-bar td {
-            padding: 6px 10px;
-            font-size: 10.5px;
-        }
-
-        /* ── banner ── */
         .page-banner {
             background-color: #e8edf3;
             color: #2d3748;
@@ -84,14 +36,65 @@
             padding: 4px 10px;
             margin-bottom: 8px;
             border-radius: 4px;
-            text-align: center;
         }
 
-        /* ── items table ── */
+        .head-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 6px;
+        }
+
+        .head-table td {
+            padding: 4px 6px 8px 6px;
+            vertical-align: middle;
+        }
+
+        .clinic-title {
+            font-size: 19px;
+            font-weight: bold;
+            color: #1a365d;
+        }
+
+        .clinic-sub {
+            font-size: 11px;
+            color: #4a5568;
+            margin-top: 2px;
+        }
+
+        .meta {
+            font-size: 10px;
+            color: #2d3748;
+            text-align: left;
+            line-height: 1.7;
+        }
+
+        .patient-bar {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #cbd5e0;
+            background-color: #f7fafc;
+            margin-bottom: 8px;
+            margin-top: 6px;
+        }
+
+        .patient-bar td {
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+
+        .invoice-title {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 6px 0 8px 0;
+        }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-top: 4px;
         }
 
         .items-table th {
@@ -99,7 +102,7 @@
             color: #2d3748;
             border: 1.5px solid #cbd5e0;
             padding: 6px 4px;
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: bold;
             text-align: center;
         }
@@ -107,139 +110,166 @@
         .items-table td {
             border: 1.5px solid #cbd5e0;
             padding: 5px 4px;
-            font-size: 10px;
+            font-size: 10.5px;
             text-align: center;
-            vertical-align: middle;
         }
 
-        .items-table td.svc {
-            text-align: right;
-        }
-
-        .items-table tbody tr:nth-child(even) {
+        .items-table tr:nth-child(even) td {
             background-color: #f7fafc;
         }
 
-        /* ── sum table ── */
-        .sum-wrap {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
-
         .sum-table {
-            width: 52%;
+            width: 100%;
             border-collapse: collapse;
         }
 
         .sum-table td {
             border: 1.5px solid #cbd5e0;
             padding: 6px 10px;
-            font-size: 10.5px;
+            font-size: 11px;
         }
 
-        .sum-table td.num {
-            text-align: left;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .sum-table tr.payable td {
-            background-color: #1a365d;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .sum-table tr:nth-child(even) td {
-            background-color: #f7fafc;
-        }
-
-        .sum-table tr.payable td {
-            background-color: #1a365d !important;
-        }
-
-        /* ── footer ── */
-        .doc-footer {
+        .footer-table {
+            width: 100%;
             border-top: 2px solid #0f766e;
-            padding-top: 5px;
-            margin-top: 8px;
+            border-collapse: collapse;
+        }
+
+        .footer-table td {
+            padding-top: 4px;
             font-size: 9.5px;
             color: #2d3748;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        @media print {
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
+            vertical-align: top;
         }
     </style>
 </head>
 
 <body>
 
-    {{-- header --}}
+    @php
+    // ── تاریخ — بدون وابستگی به Jalalian ──────────────────────────────
+    $displayDate = '---';
+    try {
+    $displayDate = \Carbon\Carbon::parse($createdAt)->format('Y/m/d');
+    } catch (\Throwable $e) {
+    $displayDate = is_string($createdAt) ? substr($createdAt, 0, 10) : '---';
+    }
+
+    // ── اطلاعات بیمار از archive ───────────────────────────────────────
+    $fileNumber = $archive->file_number ?? $archive->id ?? '---';
+    $nationalCode = $archive->national_code ?? '---';
+
+    // ── جمع اقلام (محاسبه مجدد از items برای اطمینان) ─────────────────
+    $calcTotal = collect($items)->sum(function($i) {
+    $qty = (float)($i['count'] ?? $i['quantity'] ?? 1);
+    return (float)($i['total'] ?? ($qty * (float)($i['price'] ?? 0)));
+    });
+    $finalTotal = $totalAmount > 0 ? $totalAmount : $calcTotal;
+    $finalPayable = $payableAmount > 0 ? $payableAmount : max($calcTotal - (float)$discount, 0);
+    @endphp
+
+    <htmlpagefooter name="clinicFooter">
+        <table class="footer-table" dir="ltr">
+            <tr>
+                <td style="width: 35%; text-align: left; direction: ltr;">
+                    <strong style="color: #0f766e; font-size: 11px;">www.TehranEP.center</strong><br>
+                    Tel &amp; WhatsApp: +98(21) 88887270
+                </td>
+                <td style="width: 65%; text-align: right; direction: rtl; font-size: 10px;">
+                    <strong>تهران – خيابان وليعصر – خيابان توانير – نرسيده به ميدان – نبش روانسر</strong><br>
+                    <span>تلفن: ۰۲۱-۸۸۸۸۷۲۷۰</span>
+                </td>
+            </tr>
+        </table>
+    </htmlpagefooter>
+
+    <sethtmlpagefooter name="clinicFooter" value="on" />
+
+    {{-- ── هدر کلینیک ── --}}
     <table class="head-table">
         <tr>
-            <td style="width:14%; text-align:left; padding-left:6px;">
+            <td style="width: 15%; text-align: left; padding-left: 8px;">
                 @if(!empty($logo))
-                <img src="{{ $logo }}" alt="لوگو" style="height:50px; width:auto;">
+                <img src="{{ $logo }}" alt="لوگو" style="height: 52px; width: auto;">
                 @endif
             </td>
-            <td style="width:56%; text-align:right;">
+            <td style="width: 55%; text-align: right;">
                 <div class="clinic-title">مرکز آریتمی تهران</div>
                 <div class="clinic-sub">تشخيص و درمان اختلالات ضربان قلب</div>
             </td>
-            <td class="meta" style="width:30%;">
-                <div><strong>شماره پرونده:</strong> #{{ $invoice['file_number'] ?? '---' }}</div>
-                <div><strong>شماره فاکتور:</strong> {{ $invoice['invoice_number'] ?? '---' }}</div>
+            <td class="meta" style="width: 30%;">
+                <div><strong>شماره پرونده:</strong>
+                    @if(function_exists('fa_num')) {{ fa_num($fileNumber) }}
+                    @else {{ $fileNumber }} @endif
+                </div>
+                <div><strong>شماره فاکتور:</strong>
+                    @if(function_exists('fa_num')) {{ fa_num($invoiceNumber) }}
+                    @else {{ $invoiceNumber }} @endif
+                </div>
                 <div><strong>تاریخ صدور:</strong>
-                    @if(!empty($invoice['issued_at']))
-                    {{ \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($invoice['issued_at']))->format('Y/m/d') }}
-                    @else
-                    ---
-                    @endif
+                    @if(function_exists('fa_num')) {{ fa_num($displayDate) }}
+                    @else {{ $displayDate }} @endif
                 </div>
             </td>
         </tr>
     </table>
 
-    {{-- patient bar --}}
+    {{-- ── بار اطلاعات بیمار ── --}}
     <table class="patient-bar">
         <tr>
-            <td><strong>بیمار:</strong> {{ $patient['name'] ?? '---' }}</td>
-            <td><strong>موبایل:</strong> {{ $patient['phone'] ?? '—' }}</td>
+            <td style="width: 40%;"><strong>بیمار:</strong> {{ $patientName }}</td>
+            <td style="width: 30%;"><strong>کد ملی:</strong>
+                @if(function_exists('fa_num')) {{ fa_num($nationalCode) }}
+                @else {{ $nationalCode }} @endif
+            </td>
+            <td style="width: 30%;"><strong>موبایل:</strong>
+                @if(function_exists('fa_num')) {{ fa_num($mobile) }}
+                @else {{ $mobile }} @endif
+            </td>
         </tr>
     </table>
 
-    <div class="page-banner">صورتحساب درمانی &mdash; سند داخلی &mdash; فاقد اعتبار رسمی</div>
+    <div class="page-banner">فاکتور داخلی – نسخه چاپ مرکز (بدون مهر رسمی)</div>
 
-    {{-- items --}}
+    {{-- ── جدول اقلام خدمات ── --}}
+    <div class="invoice-title">صورتحساب درمانی</div>
+
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width:5%">#</th>
-                <th style="width:13%">کد خدمت</th>
-                <th style="width:38%; text-align:right; padding-right:6px;">شرح خدمت / آزمایش</th>
-                <th style="width:8%">تعداد</th>
-                <th style="width:18%">پزشک معالج</th>
-                <th style="width:18%">مبلغ (ریال)</th>
+                <th style="width: 6%;">#</th>
+                <th style="width: 12%;">کد خدمت</th>
+                <th style="width: 42%;">شرح خدمت / آزمایش</th>
+                <th style="width: 22%;">پزشک معالج / متخصص</th>
+                <th style="width: 18%;">مبلغ (تومان)</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($rows as $index => $row)
+            @forelse($items as $index => $item)
             <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $row['code'] ?? '—' }}</td>
-                <td class="svc">{{ $row['service_name'] ?? '' }}</td>
-                <td>{{ $row['quantity'] ?? $row['count'] ?? 1 }}</td>
-                <td>{{ $row['doctor_name'] ?? '—' }}</td>
-                <td>{{ number_format((float)($row['amount'] ?? 0)) }}</td>
+                <td>
+                    @if(function_exists('fa_num')) {{ fa_num($index + 1) }}
+                    @else {{ $index + 1 }} @endif
+                </td>
+                <td style="font-size: 10px;">
+                    @if(function_exists('fa_num')) {{ fa_num($item['serviceId'] ?? '---') }}
+                    @else {{ $item['serviceId'] ?? '---' }} @endif
+                </td>
+                <td style="text-align: right; padding-right: 8px;">
+                    {{ $item['serviceTitle'] ?? '' }}
+                </td>
+                <td>{{ $item['doctorName'] ?? '---' }}</td>
+                <td>
+                    @php
+                    $rowAmt = (float)($item['total'] ?? $item['price'] ?? 0);
+                    @endphp
+                    @if(function_exists('fa_num')) {{ fa_num($rowAmt, true) }}
+                    @else {{ number_format($rowAmt) }} @endif
+                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="6" style="padding:12px; text-align:center; color:#a0aec0;">
+                <td colspan="5" style="padding: 14px; color: #a0aec0; text-align: center;">
                     هیچ ردیف خدمتی ثبت نشده است.
                 </td>
             </tr>
@@ -247,40 +277,43 @@
         </tbody>
     </table>
 
-    {{-- totals --}}
-    <div class="sum-wrap">
-        <table class="sum-table">
-            <tr>
-                <td>مجموع خدمات</td>
-                <td class="num">{{ number_format((float)($invoice['total_amount'] ?? 0)) }} ریال</td>
-            </tr>
-            @if(($invoice['discount'] ?? 0) > 0)
-            <tr>
-                <td style="color:#e53e3e;">تخفیف</td>
-                <td class="num" style="color:#e53e3e;">{{ number_format($invoice['discount']) }} ریال</td>
-            </tr>
-            @endif
-            @if(($invoice['insurance_share'] ?? 0) > 0)
-            <tr>
-                <td style="color:#2b6cb0;">سهم بیمه</td>
-                <td class="num" style="color:#2b6cb0;">{{ number_format($invoice['insurance_share']) }} ریال</td>
-            </tr>
-            @endif
-            <tr class="payable">
-                <td>مبلغ قابل پرداخت</td>
-                <td class="num">{{ number_format((float)($invoice['payable_amount'] ?? 0)) }} ریال</td>
-            </tr>
-        </table>
-    </div>
-
-    {{-- footer --}}
-    <div class="doc-footer">
-        <span>
-            <strong style="color:#0f766e;">www.TehranEP.center</strong>
-            &nbsp;|&nbsp; Tel: +98(21) 88887270
-        </span>
-        <span>این سند داخلی است و فاقد مهر و امضا می‌باشد. | {{ now()->format('Y-m-d H:i') }}</span>
-    </div>
+    {{-- ── جدول جمع‌بندی ── --}}
+    <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+        <tr>
+            <td style="width: 46%;"></td>
+            <td style="width: 54%; vertical-align: top;">
+                <table class="sum-table">
+                    <tr>
+                        <td style="color: #4a5568; width: 55%;">مجموع خدمات:</td>
+                        <td style="text-align: left;">
+                            <strong>
+                                @if(function_exists('fa_num')) {{ fa_num($finalTotal, true) }}
+                                @else {{ number_format($finalTotal) }} @endif
+                            </strong> تومان
+                        </td>
+                    </tr>
+                    @if((float)$discount > 0)
+                    <tr>
+                        <td style="color: #e53e3e;">تخفیف:</td>
+                        <td style="text-align: left; color: #e53e3e;">
+                            @if(function_exists('fa_num')) {{ fa_num((float)$discount, true) }}
+                            @else {{ number_format((float)$discount) }} @endif
+                            تومان
+                        </td>
+                    </tr>
+                    @endif
+                    <tr style="background-color: #f0fff4;">
+                        <td style="color: #276749; font-weight: bold;">مبلغ قابل پرداخت:</td>
+                        <td style="text-align: left; color: #15803d; font-weight: bold;">
+                            @if(function_exists('fa_num')) {{ fa_num($finalPayable, true) }}
+                            @else {{ number_format($finalPayable) }} @endif
+                            تومان
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
 </body>
 
