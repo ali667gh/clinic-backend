@@ -1382,6 +1382,46 @@ class ArchiveController extends Controller
             ?? $this->resolveImageUrl('logo.png')
             ?? $this->resolveImageUrl('logo.jpg');
 
+        // ── اطلاعات بیمار (برای گواهی) ──────────────────────────────────
+        $patientRec = null;
+        try {
+            $patientRec = \App\Models\Patient::where('national_code', trim((string) $archive->national_code))->first();
+        } catch (\Throwable $e) {
+        }
+        $pa = $patientRec ? $patientRec->getAttributes() : [];
+
+        $panelName = trim(($pa['first_name'] ?? '') . ' ' . ($pa['last_name'] ?? ''));
+        if ($panelName === '') {
+            $panelName = $pa['name'] ?? $pa['full_name'] ?? '';
+        }
+
+        $patient = [
+            'name'          => $panelName !== '' ? $panelName : ($data['patientName'] ?? $archive->patient_name ?? 'نامشخص'),
+            'national_code' => $pa['national_code'] ?? $archive->national_code ?? '---',
+            'phone'         => $pa['mobile'] ?? $pa['phone'] ?? $data['mobile'] ?? $archive->mobile ?? '---',
+        ];
+
+        $g = strtolower(trim((string) ($pa['gender'] ?? $pa['sex'] ?? '')));
+        $genderTitle = in_array($g, ['male', 'm', 'man', 'مرد', '1'], true) ? 'آقای'
+            : (in_array($g, ['female', 'f', 'woman', 'زن', '2'], true) ? 'خانم' : 'آقا/خانم');
+
+        // ── گواهی (متن کادر خط‌چین) ──────────────────────────────────────
+        $certServices = collect($serviceList)->pluck('serviceTitle')->filter()->unique()->implode('، ');
+        if ($certServices === '') {
+            $certServices = collect($rows)->pluck('service_name')->filter()->unique()->implode('، ');
+        }
+
+        $cert = [
+            'title'         => $genderTitle,
+            'name'          => $patient['name'],
+            'national_code' => $patient['national_code'],
+            'date'          => substr($this->toPersianDate(
+                $data['submittedAt'] ?? $archive->issued_at ?? $archive->created_at ?? now()
+            ), 0, 10),
+            'services'      => $certServices,
+        ];
+
+
         $html = view('pdf.portal-invoice-internal', [
             'archive'                => $archive,
             'invoiceNumber'          => $invoiceNumber,
