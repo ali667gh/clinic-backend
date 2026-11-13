@@ -1434,6 +1434,8 @@ class ArchiveController extends Controller
             'createdAt'              => $invoiceDetails['created_at'] ?? $archive->created_at ?? now()->toDateTimeString(),
             'logo'                   => $logo,
             'doctorPrescriptionText' => $doctorPrescriptionText,
+            'patient'                => $patient,   // ← اضافه شد
+            'cert'                   => $cert,      // ← اضافه شد
         ])->render();
 
         ini_set('pcre.backtrack_limit', '50000000');
