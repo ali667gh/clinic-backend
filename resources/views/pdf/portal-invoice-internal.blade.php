@@ -90,6 +90,22 @@
             margin: 6px 0 8px 0;
         }
 
+        .cert-box {
+            border: 1.5px dashed #94a3b8;
+            background-color: #f8fafc;
+            padding: 10px 12px;
+            margin-top: 6px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .cert-text {
+            font-size: 11.5px;
+            color: #2d3748;
+            line-height: 1.9;
+            text-align: justify;
+        }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
@@ -172,14 +188,26 @@
     $displayDate = is_string($createdAt) ? substr($createdAt, 0, 10) : '---';
     }
 
-    // ── اطلاعات بیمار از archive ───────────────────────────────────────
+    // ── اطلاعات بیمار ──────────────────────────────────────────────────
     $fileNumber = $archive->file_number ?? $archive->id ?? '---';
-    $nationalCode = $archive->national_code ?? '---';
+    $nationalCode = $patient['national_code'] ?? $archive->national_code ?? '---';
+    $patientLabel = $patient['name'] ?? $patientName ?? '---';
+    $patientPhone = $patient['phone'] ?? $mobile ?? '---';
+
+    // ── گواهی ──────────────────────────────────────────────────────────
+    $cert = $cert ?? [];
+    $certTitle = $cert['title'] ?? 'آقا/خانم';
+    $certName = $cert['name'] ?? $patientLabel;
+    $certNC = $cert['national_code'] ?? $nationalCode;
+    $certDate = $cert['date'] ?? $displayDate;
+    $certServices = $cert['services'] ?? '';
 
     // ── جمع از rows ────────────────────────────────────────────────────
     $calcTotal = collect($rows)->sum('amount');
     $finalTotal = $totalAmount > 0 ? $totalAmount : $calcTotal;
-    $finalPayable = $payableAmount > 0 ? $payableAmount : max($calcTotal - (float)$discount, 0);
+    $finalPayable = $payableAmount > 0 ? $payableAmount : max($calcTotal - (float) $discount, 0);
+
+    $hasPrescription = trim((string) ($doctorPrescriptionText ?? '')) !== '';
     @endphp
 
     <htmlpagefooter name="clinicFooter">
@@ -230,19 +258,34 @@
     {{-- ── بار اطلاعات بیمار ── --}}
     <table class="patient-bar">
         <tr>
-            <td style="width: 40%;"><strong>بیمار:</strong> {{ $patientName }}</td>
+            <td style="width: 40%;"><strong>بیمار:</strong> {{ $patientLabel }}</td>
             <td style="width: 30%;"><strong>کد ملی:</strong>
                 @if(function_exists('fa_num')) {{ fa_num($nationalCode) }}
                 @else {{ $nationalCode }} @endif
             </td>
             <td style="width: 30%;"><strong>موبایل:</strong>
-                @if(function_exists('fa_num')) {{ fa_num($mobile) }}
-                @else {{ $mobile }} @endif
+                @if(function_exists('fa_num')) {{ fa_num($patientPhone) }}
+                @else {{ $patientPhone }} @endif
             </td>
         </tr>
     </table>
 
     <div class="page-banner">فاکتور داخلی – نسخه چاپ مرکز (بدون مهر رسمی)</div>
+
+    {{-- ── متن گواهی ── --}}
+    <div class="cert-box">
+        <div class="cert-text">
+            {{ $certTitle }} <strong>{{ $certName }}</strong>
+            با کد ملی <strong>{{ function_exists('fa_num') ? fa_num($certNC) : $certNC }}</strong>
+            در تاریخ <strong>{{ function_exists('fa_num') ? fa_num($certDate) : $certDate }}</strong>
+            به مرکز آریتمی تهران مراجعه نموده و خدمات
+            <strong>{{ $certServices }}</strong>
+            برای ایشان ثبت و انجام شود
+            @if($hasPrescription)
+            <br>{!! nl2br(e($doctorPrescriptionText)) !!}
+            @endif
+        </div>
+    </div>
 
     {{-- ── جدول اقلام خدمات ── --}}
     <div class="invoice-title">صورتحساب درمانی</div>
@@ -273,7 +316,7 @@
                 </td>
                 <td>{{ $row['doctor_name'] ?? '---' }}</td>
                 <td>
-                    @php $rowAmt = (float)($row['amount'] ?? 0); @endphp
+                    @php $rowAmt = (float) ($row['amount'] ?? 0); @endphp
                     @if(function_exists('fa_num')) {{ fa_num($rowAmt, true) }}
                     @else {{ number_format($rowAmt) }} @endif
                 </td>
@@ -303,12 +346,12 @@
                             </strong> تومان
                         </td>
                     </tr>
-                    @if((float)$discount > 0)
+                    @if((float) $discount > 0)
                     <tr>
                         <td style="color: #e53e3e;">تخفیف:</td>
                         <td style="text-align: left; color: #e53e3e;">
-                            @if(function_exists('fa_num')) {{ fa_num((float)$discount, true) }}
-                            @else {{ number_format((float)$discount) }} @endif
+                            @if(function_exists('fa_num')) {{ fa_num((float) $discount, true) }}
+                            @else {{ number_format((float) $discount) }} @endif
                             تومان
                         </td>
                     </tr>
@@ -325,14 +368,6 @@
             </td>
         </tr>
     </table>
-
-    {{-- ── دستور پزشک ── --}}
-    @if(!empty($doctorPrescriptionText))
-    <div class="prescription-box">
-        <div class="prescription-title">دستور پزشک / توضیحات تکمیلی:</div>
-        <div>{{ $doctorPrescriptionText }}</div>
-    </div>
-    @endif
 
 </body>
 
