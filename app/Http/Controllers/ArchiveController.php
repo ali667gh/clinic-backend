@@ -1245,7 +1245,7 @@ class ArchiveController extends Controller
             ?? $this->resolveImageUrl('logo.png')
             ?? $this->resolveImageUrl('logo.jpg');
 
-        $html = view('pdf.portal-invoice-internal', [
+        $html = view('pdf.portal-invoice-internal-pdf', [
             'archive'       => $archive,
             'invoiceNumber' => $invoiceNumber,
             'items'         => $items,

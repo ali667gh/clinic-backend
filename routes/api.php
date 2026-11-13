@@ -227,7 +227,7 @@ Route::middleware('auth:sanctum')->group(function () {
         | - internal-print : HTML آماده‌ی پرینت برای iframe فرانت‌اند
         */
 
-        Route::get('/archives/{id}/internal-pdf', [
+        Route::get('/archives/{id}/internal', [
             ArchiveController::class,
             'internalInvoicePdf'
         ])->whereNumber('id');
