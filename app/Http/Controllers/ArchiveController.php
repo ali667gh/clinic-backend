@@ -900,6 +900,41 @@ class ArchiveController extends Controller
             'patient_name' => $archive->patient_name
         ]);
     }
+    /**
+     * POST /api/patient/archives
+     * Returns all archives for a given national_code.
+     */
+    public function patientArchiveList(Request $request)
+    {
+        $request->validate([
+            'national_code' => 'required|string|max:20',
+        ]);
+
+        $nationalCode = trim($request->input('national_code'));
+
+        $archives = Archive::where('national_code', $nationalCode)
+            ->orderByDesc('issued_at')
+            ->get(['patient_name', 'file_number', 'issued_at', 'tracking_token']);
+
+        if ($archives->isEmpty()) {
+            return response()->json([
+                'status'  => 'not_found',
+                'message' => 'هیچ پرونده‌ای با این کد ملی یافت نشد.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status'       => 'success',
+            'patient_name' => $archives->first()->patient_name,
+            'archives'     => $archives->map(fn($a) => [
+                'file_number'  => $a->file_number,
+                'issued_at'    => $a->issued_at
+                    ? Carbon::parse($a->issued_at)->format('Y-m-d')
+                    : null,
+                'tracking_token' => $a->tracking_token,
+            ]),
+        ]);
+    }
 
     /**
      * ساخت PDF فاکتور پرتال بیمار با mPDF

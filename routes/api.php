@@ -51,6 +51,9 @@ Route::get('/invoices/{invoice}/official-pdf', [
     'officialPdf'
 ])->name('invoices.official-pdf');
 
+// Patient archive list (بدون احراز هویت — کد ملی خود بیمار اعتبار است)
+Route::post('/patient/archives', [ArchiveController::class, 'patientArchiveList'])
+    ->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
