@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM laravel-prod-base:1.0
 
 WORKDIR /var/www/html
