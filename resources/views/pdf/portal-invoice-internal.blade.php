@@ -307,7 +307,7 @@
             </tr>
         </table>
 
-        <div class="page-banner">فاکتور رسمی مرکز آریتمی</div>
+        <div class="page-banner">دستورات پزشک : </div>
 
         {{-- ── متن گواهی ── --}}
         <div class="cert-box">
@@ -332,7 +332,7 @@
                 <tr>
                     <th style="width: 6%;">#</th>
                     <th style="width: 12%;">کد خدمت</th>
-                    <th style="width: 42%;">شرح خدمت / آزمایش</th>
+                    <th style="width: 42%;">شرح خدمت / تست</th>
                     <th style="width: 22%;">پزشک معالج / متخصص</th>
                     <th style="width: 18%;">مبلغ (تومان)</th>
                 </tr>
@@ -403,6 +403,24 @@
                         </tr>
                     </table>
                 </td>
+            </tr>
+        </table>
+
+        <div class="doctors-title">مهر و امضای پزشک:</div>
+
+        <table class="doctors-table">
+            <tr>
+                @forelse($visitDoctors as $doc)
+                <td>
+                    <div style="height: 70px;"></div>
+                    @endif
+                    <div class="doc-name">{{ $doc['name'] ?? '' }}</div>
+                </td>
+                @empty
+                <td>
+                    <div style="height: 70px;"></div>
+                </td>
+                @endforelse
             </tr>
         </table>
 

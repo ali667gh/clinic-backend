@@ -324,7 +324,7 @@
             <tr>
                 <th style="width: 6%;">#</th>
                 <th style="width: 14%;">کد خدمت</th>
-                <th style="width: 40%;">شرح خدمت / آزمایش</th>
+                <th style="width: 40%;">شرح خدمت / تست</th>
                 <th style="width: 22%;">پزشک معالج / متخصص</th>
                 <th style="width: 18%;">مبلغ (تومان)</th>
             </tr>
