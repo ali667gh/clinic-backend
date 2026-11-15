@@ -406,19 +406,20 @@
             </tr>
         </table>
 
-        <div class="doctors-title">مهر و امضای پزشک:</div>
-
         <table class="doctors-table">
             <tr>
                 @forelse($visitDoctors as $doc)
                 <td>
-                    <div style="height: 70px;"></div>
-                    @endif
+                    <!-- @if(!empty($doc['stamp']))
+                <img src="{{ $doc['stamp'] }}" alt="مهر پزشک" style="max-height: 95px; max-width: 180px;">
+                @else
+                <div style="height: 65px;"></div>
+                @endif -->
                     <div class="doc-name">{{ $doc['name'] ?? '' }}</div>
                 </td>
                 @empty
                 <td>
-                    <div style="height: 70px;"></div>
+                    <div style="height: 65px;"></div>
                 </td>
                 @endforelse
             </tr>

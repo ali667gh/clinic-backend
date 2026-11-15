@@ -267,16 +267,16 @@
         <tr>
             @forelse($visitDoctors as $doc)
             <td>
-                @if(!empty($doc['stamp']))
-                <img src="{{ $doc['stamp'] }}" alt="مهر پزشک" style="max-height: 105px; max-width: 190px;">
+                <!-- @if(!empty($doc['stamp']))
+                <img src="{{ $doc['stamp'] }}" alt="مهر پزشک" style="max-height: 95px; max-width: 180px;">
                 @else
-                <div style="height: 70px;"></div>
-                @endif
+                <div style="height: 65px;"></div>
+                @endif -->
                 <div class="doc-name">{{ $doc['name'] ?? '' }}</div>
             </td>
             @empty
             <td>
-                <div style="height: 70px;"></div>
+                <div style="height: 65px;"></div>
             </td>
             @endforelse
         </tr>
@@ -390,11 +390,11 @@
         <tr>
             @forelse($visitDoctors as $doc)
             <td>
-                @if(!empty($doc['stamp']))
+                <!-- @if(!empty($doc['stamp']))
                 <img src="{{ $doc['stamp'] }}" alt="مهر پزشک" style="max-height: 95px; max-width: 180px;">
                 @else
                 <div style="height: 65px;"></div>
-                @endif
+                @endif -->
                 <div class="doc-name">{{ $doc['name'] ?? '' }}</div>
             </td>
             @empty
