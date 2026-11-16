@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://report-tehranep.site', 'https://api.report-tehranep.site'],
+    'allowed_origins' => ['https://report-tehranep.site', 'https://api.report-tehranep.site' , 'http://185.213.167.19:9091'],
 
     'allowed_origins_patterns' => [],
 
